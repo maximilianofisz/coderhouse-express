@@ -1,0 +1,20 @@
+[
+  {
+    "title": "RTX 3090",
+    "price": 9.99,
+    "thumbnail": "test-1.com",
+    "id": 1
+  },
+  {
+    "title": "Ryzen 420",
+    "price": 666,
+    "thumbnail": "test-2.com",
+    "id": 2
+  },
+  {
+    "title": "Billete de 1 dolar",
+    "price": 100000000000,
+    "thumbnail": "test-3.com",
+    "id": 3
+  }
+]
