@@ -16,5 +16,32 @@
     "price": 100000000000,
     "thumbnail": "test-3.com",
     "id": 3
+  },
+  {
+    "title": "Copia del Elden Ring firmada por Miyazaki",
+    "price": 9999999999,
+    "thumbnail": "test-420.com",
+    "id": 4
+  },
+  {
+    "title": "aaa",
+    "thumbnail": "aaa",
+    "id": 5
+  },
+  {
+    "title": "aaab",
+    "thumbnail": "aaad",
+    "id": 6
+  },
+  {
+    "title": "aaab",
+    "thumbnail": "aaad",
+    "id": 7
+  },
+  {
+    "title": "",
+    "price": "",
+    "thumbnail": "",
+    "id": 8
   }
 ]
