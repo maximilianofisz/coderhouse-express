@@ -1,7 +1,22 @@
 const express = require('express')
 const productosRouter = require('./routes/productos.js')
+const handlebars = require('express-handlebars')
 const app = express()
 const bodyParser = require('body-parser')
+
+
+app.engine("hbs",
+ handlebars.engine({
+    extname: ".hbs",
+    defaultLayout: 'main.hbs',
+    layoutsDir: __dirname + '/views/layouts',
+    partialsDir: __dirname + '/views/partials'
+}))
+
+app.set("view engine", "hbs")
+
+app.set("views", __dirname + "/views")
+
 
 //Log time and request
 app.use((req, res, next) => {
@@ -14,8 +29,8 @@ app.use(bodyParser.urlencoded({
     extended: true
 }))
 
-app.use(express.static('src/public'))
-app.use('/api/productos', productosRouter)
+app.use(express.static('src-hbs/public'))
+app.use(productosRouter)
 
 
 

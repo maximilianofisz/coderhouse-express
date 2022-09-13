@@ -24,7 +24,13 @@ class Contenedor{
             for(let i = 0; i < currentData.length; i++){
                 newData.push(currentData[i])
             }
-            objeto.id = currentData[currentData.length-1]["id"] + 1
+            if(currentData.length == 0){
+                objeto.id = 1
+            }
+            else{
+                objeto.id = currentData[currentData.length-1]["id"] + 1
+            }
+            
             newData.push(objeto)
             
             
@@ -32,7 +38,7 @@ class Contenedor{
             fs.unlinkSync(this.path)
             fs.writeFileSync(this.path, JSON.stringify(newData, null, 2))
 
-            console.log(JSON.parse(fs.readFileSync(this.path)))
+            /* console.log(JSON.parse(fs.readFileSync(this.path))) */
             console.log(`Id asignado al nuevo objeto es ${objeto.id}`)
         }
     }
@@ -82,9 +88,15 @@ class Contenedor{
     }
 
     getAll(){
-        let all = JSON.parse(fs.readFileSync(this.path))
-        console.log(all)
-        return all
+        if(!fs.existsSync(this.path) || fs.readFileSync(this.path) == ""){
+            return []
+        }
+        else{
+            let all = JSON.parse(fs.readFileSync(this.path))
+            /* console.log(all) */
+            return all
+        }
+
     }
 
     deleteById(numero){

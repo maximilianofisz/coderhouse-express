@@ -4,15 +4,17 @@ const random = require('random')
 const Contenedor = require('../helpers/contenedor-sync.js')
 
 
-const contenedor = new Contenedor('src/data/productos.txt')
+const contenedor = new Contenedor('src-hbs/data/productos.txt')
 
 
-router.get('/', (req, res)=>{
+router.get('/productos', (req, res)=>{
     let currentData = contenedor.getAll()
-    res.send(currentData)
+    res.render('productos', {
+        data: currentData
+    })
 })
 
-router.get('/:id', (req, res)=>{
+/* router.get('/:id', (req, res)=>{
     const currentData = contenedor.getbyId(parseInt(req.params.id))
     if(currentData){
         res.send(currentData)
@@ -20,18 +22,19 @@ router.get('/:id', (req, res)=>{
     else{
         res.send({error: 'Producto no encontrado'})
     }
-})
+}) */
 
-router.post('/', (req, res)=>{
+/* router.post('/', (req, res)=>{
     const product = req.body
     contenedor.save(product)
     const allProducts = contenedor.getAll()
     const id = allProducts[allProducts.length-1]["id"]
     res.send(`Se guardo el objeto. El ID asignado es ${id}`)
-})
+}) */
+
 
 // Post desde index.html
-router.post('/productosViaWeb', (req, res) =>{
+router.post('/productos', (req, res) =>{
     const product = {
         title:   req.body.title,
         price: req.body.price,
@@ -41,12 +44,12 @@ router.post('/productosViaWeb', (req, res) =>{
 
     const allProducts = contenedor.getAll()
     const id = allProducts[allProducts.length-1]["id"]
-    res.send(`Se guardo el objeto. El ID asignado es ${id}`)
+    res.redirect('/')
 })
 
 
 
-router.put('/:id', (req, res) =>{
+/* router.put('/:id', (req, res) =>{
     const product = req.body
     const id = parseInt(req.params.id)
     if(contenedor.getbyId(id)){
@@ -58,9 +61,9 @@ router.put('/:id', (req, res) =>{
         res.send({error: 'Producto no encontrado'})
     }
 
-})
+}) */
 
-router.delete('/:id', (req, res) =>{
+/* router.delete('/:id', (req, res) =>{
     const id = parseInt(req.params.id)
     if(contenedor.getbyId(id)){
         contenedor.deleteById(id)
@@ -69,7 +72,7 @@ router.delete('/:id', (req, res) =>{
     else{
         res.send({error: 'Producto no encontrado'})
     }
-})
+}) */
 
 
 

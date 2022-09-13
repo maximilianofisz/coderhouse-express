@@ -1,0 +1,27 @@
+doctype html
+html(lang='en')
+ head
+   title Productos
+   style
+        include ./style.css
+ body
+   h1 Mis productos
+   if dataExists
+      table
+        tr
+          th Producto
+          th Precio
+          th Foto 
+        tr
+        each producto in data
+          tr
+            td= producto.title
+            td= "$" + producto.price
+            td
+              img(src=producto.thumbnail)             
+   else
+      h2 No hay productos!
+   br
+   a(href="/")
+      button(button type="button") Cargar un producto
+
