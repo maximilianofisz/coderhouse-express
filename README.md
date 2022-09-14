@@ -19,3 +19,7 @@ npm run start-ejs
 | Handlebars | 8080 |
 | Pug | 8081 |
 | Ejs | 8082 |
+
+
+## Motor de plantilla seleccionado
+Probablemente utilize el motor de plantillas Handlebars porque es el mas minimalista: El html del template es casi html nativo con excepcion de la logica y la posibilidad de acceso a los datos inyectados. En segundo lugar, pondria a EJS, que a pesar de que no me gusto su sintaxis, me intereso la posibilidad de inyectar javascript scripts nativamente.
