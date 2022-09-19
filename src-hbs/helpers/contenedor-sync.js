@@ -13,7 +13,7 @@ class Contenedor{
             let newData = [objeto]
             fs.writeFileSync(this.path, JSON.stringify(newData, null, 2))
             console.log(JSON.parse(fs.readFileSync(this.path)))
-            console.log(`Id asignado al nuevo objeto es ${objeto.id}`)
+            /* console.log(`Id asignado al nuevo objeto es ${objeto.id}`) */
         }
         //Si el archivo ya existe
         else{
@@ -39,7 +39,7 @@ class Contenedor{
             fs.writeFileSync(this.path, JSON.stringify(newData, null, 2))
 
             /* console.log(JSON.parse(fs.readFileSync(this.path))) */
-            console.log(`Id asignado al nuevo objeto es ${objeto.id}`)
+            /* console.log(`Id asignado al nuevo objeto es ${objeto.id}`) */
         }
     }
 

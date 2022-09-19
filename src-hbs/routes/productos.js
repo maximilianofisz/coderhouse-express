@@ -42,9 +42,16 @@ router.post('/productos', (req, res) =>{
     }
     contenedor.save(product)
 
+    /* Me traigo la instancia de IO del main, la lista actualizada de productos y la emito globalmente, luego de cada insercion */
+    const io = req.app.get('socketio')
     const allProducts = contenedor.getAll()
-    const id = allProducts[allProducts.length-1]["id"]
-    res.redirect('/')
+    io.sockets.emit("currentProducts", allProducts)
+
+/*     const allProducts = contenedor.getAll()
+    const id = allProducts[allProducts.length-1]["id"] */
+
+    
+    res.end()
 })
 
 

@@ -26,6 +26,7 @@
     "express-handlebars": "^6.0.6",
     "nodemon": "^2.0.19",
     "pug": "^3.0.2",
-    "random": "^3.0.6"
+    "random": "^3.0.6",
+    "socket.io": "^4.5.2"
   }
 }

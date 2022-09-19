@@ -5,21 +5,57 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/index.js" defer></script>
+    
 </head>
 <body>
-    <form action="/productos" method="post">
-        <label for="title">Title:</label><br>
-        <input type="text" id="title" name="title"><br><br>
+    <section class="input-productos">
+        <hr>
+        <form action="/productos" method="post" target="dummyframe">
+            <label for="title">Title:</label><br>
+            <input type="text" id="title" name="title"><br><br>
 
-        <label for="price">Price:</label><br>
-        <input type="number" id="price" name="price"><br><br>
+            <label for="price">Price:</label><br>
+            <input type="number" id="price" name="price"><br><br>
 
-        <label for="thumbnail">Thumbnail:</label><br>
-        <input type="text" id="thumbnail" name="thumbnail"><br><br>
+            <label for="thumbnail">Thumbnail:</label><br>
+            <input type="text" id="thumbnail" name="thumbnail"><br><br>
 
-        <input type="submit" value="Submit">
-      </form>
-      <br>
-      <a href="/productos"><button type="button">Lista de productos</button></a>
+            <input class="submit" type="submit" value="Submit">
+        </form>
+        <br>
+        <a href="/productos"><button type="button">Lista de productos</button></a>
+        <hr>
+    </section>
+
+
+
+<!-- Dummy frame al que hago redirect luego de cargar un nuevo producto -->
+<iframe name="dummyframe" id="dummyframe" style="display:none"></iframe>
+    
+    <section class="lista-productos">
+        <!-- Un script que me voy a traer para convertir en template e inyectar. Fetch me estaba tratando mal pero esto funciona -->
+        <script id="lista-productos" type="text/x-handlebars-template">
+            <table>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Foto</th>
+                </tr>
+                {{#each data}}
+                    <tr>
+                        <td>{{this.title}}</td>
+                        <td>${{this.price}}</td>
+                        <td><img src={{this.thumbnail}}></td>
+                    </tr>
+                {{/each}}    
+            </table>
+        </script>
+    </section>
+      
 </body>
 </html>
