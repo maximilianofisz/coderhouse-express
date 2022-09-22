@@ -1,21 +1,49 @@
 const socket = io()
 
-/* Me traigo el template y lo compilo, listo para pasarle valores y render */
-let emptyTemplate = $("#lista-productos").html()
+/* Me traigo los templates y los compilo, listos para pasarles valores y render */
+let emptyTemplateProductos = $("#lista-productos").html()
+let emptyTemplateMensajes = $("#lista-mensajes").html()
     
-let compiled = Handlebars.compile(emptyTemplate)
+let compiledProductos = Handlebars.compile(emptyTemplateProductos)
+let compiledMensajes = Handlebars.compile(emptyTemplateMensajes)
 
 
 socket.on('currentProducts', (data) =>{
     /* render */
-    $(".lista-productos").html(compiled({data: data}))
+    $(".lista-productos").html(compiledProductos({data: data}))
 
 })
 
-/* Cada vez que alguien crea un producto, genero un evento global actualizar la lista a todos */
-let button = document.querySelector(".submit")
-button.addEventListener("click", function(){
+socket.on('currentMessages', (mensajes) =>{
+    /* render */
+    $(".lista-mensajes").html(compiledMensajes({mensajes: mensajes}))
+
+})
+
+
+
+/* Cada vez que alguien crea un producto, genero un evento global para actualizar la lista a todos */
+let buttonProductos = document.querySelector(".submitProducto")
+buttonProductos.addEventListener("click", function(){
     socket.emit('newProduct')
+})
+
+
+/* Cada vez que alguien envia un mensaje, genero un evento global para actualizar la lista a todos */
+let buttonMensajes = document.querySelector(".submitMensaje")
+buttonMensajes.addEventListener("click", function(){
+    let emailValue = document.getElementById("email").value
+    let mensajeValue = document.getElementById("mensaje").value
+    if(emailValue && mensajeValue){
+        let mensaje = {
+            correo: emailValue,
+            mensaje: mensajeValue
+        }
+        socket.emit('newMessage', mensaje)
+    }
+    else{
+        alert("Es necesario ingresar un correo electronico y un mensaje para ingresar al chat")
+    }
 })
 
 

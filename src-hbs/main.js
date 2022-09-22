@@ -1,10 +1,12 @@
 const express = require('express')
 const { Server: HttpServer } = require('http')
 const { Server: IOServer } = require('socket.io')
-
+const moment = require('moment/moment')
 
 const Contenedor = require('./helpers/contenedor-sync.js')
 const contenedor = new Contenedor('src-hbs/data/productos.txt')
+const mensajero = new Contenedor('src-hbs/data/mensajes.txt')
+
 
 const productosRouter = require('./routes/productos.js')
 const handlebars = require('express-handlebars')
@@ -27,6 +29,7 @@ app.set("view engine", "hbs")
 
 app.set("views", __dirname + "/views")
 
+/* Necesito esto para poder usar sockers en mi Router */
 app.set('socketio', io)
 
 //Log time and request
@@ -44,10 +47,25 @@ app.use(bodyParser.urlencoded({
 app.use(express.static('src-hbs/public'))
 app.use(productosRouter)
 
-/* Envio la lista inicial de productos a quien se conecte, el resto, se encarga el router (productosRouter) */
+
+
+
+/* Envio la lista inicial de productos y mensajes a quien se conecte, el resto, se encarga el router (productosRouter con su evento newProduct) y el evento newMessage */
 io.on('connection', (socket) => {
     let products = contenedor.getAll()
+    let mensajes = mensajero.getAll()
     socket.emit("currentProducts", products)
+    socket.emit("currentMessages", mensajes)
+
+    /* Guardo un nuevo mensaje y actualizo a todos los usuarios */
+    socket.on("newMessage", mensaje =>{
+        mensaje.fecha = "[" + moment().format('MMMM Do YYYY, h:mm:ss a') + "]"
+        mensajero.save(mensaje)
+        let mensajes = mensajero.getAll()
+        io.sockets.emit("currentMessages", mensajes)
+    })
+
+
 })
 
 httpServer.listen(8080, ()=>{

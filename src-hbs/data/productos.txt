@@ -28,17 +28,5 @@
     "price": "0",
     "thumbnail": "https://cdn4.iconfinder.com/data/icons/space-exploration-set/128/iStar_Design_Space_LineIcons_Live-8-512.png",
     "id": 5
-  },
-  {
-    "title": "",
-    "price": "",
-    "thumbnail": "",
-    "id": 6
-  },
-  {
-    "title": "",
-    "price": "",
-    "thumbnail": "",
-    "id": 7
   }
 ]

@@ -1,6 +1,5 @@
 # Coderhouse: Desafio con Express
-## Formas de probar el proyecto
-### Iniciar con Handlebars:
+## Iniciar el proyecto
 ```
 npm run start-hbs
 ```
