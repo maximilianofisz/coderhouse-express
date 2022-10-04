@@ -7,9 +7,11 @@ class Contenedor{
     }
 
     save(objeto){
+        objeto.timestamp = Date.now()
         //Caso de que no exista archivo o este vacio, creamos un array con el nuevo objeto y lo escribimos
         if(!fs.existsSync(this.path) || fs.readFileSync(this.path) == ""){
             objeto.id = 1
+            
             let newData = [objeto]
             fs.writeFileSync(this.path, JSON.stringify(newData, null, 2))
             /* console.log(JSON.parse(fs.readFileSync(this.path))) */

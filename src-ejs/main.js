@@ -4,9 +4,9 @@ const app = express()
 const bodyParser = require('body-parser')
 
 
-app.set("view engine", "ejs")
+/* app.set("view engine", "ejs")
 
-app.set("views", __dirname + "/views")
+app.set("views", __dirname + "/views") */
 
 
 //Log time and request
@@ -20,8 +20,8 @@ app.use(bodyParser.urlencoded({
     extended: true
 }))
 
-app.use(express.static('src-ejs/public'))
-app.use(productosRouter)
+/* app.use(express.static('src-ejs/public')) */
+/* app.use(productosRouter) */
 
 
 
