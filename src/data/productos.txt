@@ -1,6 +1,6 @@
 [
   {
-    "nombre": "prueba 4",
+    "nombre": "prod1",
     "descripcion": "pruebas",
     "precio": "0",
     "stock": 0,
@@ -10,7 +10,7 @@
     "id": 1
   },
   {
-    "nombre": "prueba carrito",
+    "nombre": "prod2",
     "descripcion": "pruebas",
     "precio": "0",
     "stock": 0,

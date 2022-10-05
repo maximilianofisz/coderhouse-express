@@ -42,6 +42,30 @@ app.use((req, res, next) => {
     next()
 })
 
+// Middleware para autorizar o no ciertas rutas. Queda hardcodeado para bloquear todo menos GET.
+app.use((req, res, next) => {
+    const isAdmin = req.headers["isadmin"]
+    let needsAuth = false
+    if (req.method == "POST" || req.method == "PUT" || req.method == "DELETE"){
+        needsAuth = true
+    }
+
+    if (needsAuth && isAdmin == "true"){
+        next()
+    }
+    else if(!needsAuth){
+        next()
+    }
+    if(needsAuth && (isAdmin == null || isAdmin != "true")){
+        res.send({
+            error: -1,
+            descripcion: `ruta ${req.method} ${req.originalUrl} no autorizada`
+         })
+    }
+})
+
+
+
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
@@ -53,6 +77,16 @@ app.use("/api/productos", productosRouter)
 app.use("/api/carrito", carritoRouter)
 
 
+// Handleo todo lo no implementado aca
+app.all("*", (req, res) => {
+    res.status(404)
+    res.end(JSON.stringify({
+        error: -2,
+        descripcion: `ruta ${req.method} ${req.originalUrl} no implementada`
+    }))
+ });
+
+// Comente todo lo de websockets que no creo estar usando
 /* Envio la lista inicial de productos y mensajes a quien se conecte, el resto, se encarga el router (productosRouter con su evento newProduct) y el evento newMessage */
 
 /* io.on('connection', (socket) => {
