@@ -13,7 +13,7 @@ Para poder acceder a las rutas de administrador, es necesario agregar en nuestra
 ```
 isadmin : true
 ```
-Las unicas rutas actualmente disponibles son las que usan el metodo GET. POST, PUT y DELETE requieren el header.
+
 
 <br/><br/>
 

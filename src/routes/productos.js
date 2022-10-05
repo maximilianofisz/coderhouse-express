@@ -6,10 +6,30 @@ const Contenedor = require('../helpers/contenedor-sync.js')
 
 const contenedor = new Contenedor('src/data/productos.txt')
 
-// Middleware para chequear admin en algunos verbos
+// Middleware para autorizar o no ciertas rutas. Queda hardcodeado para bloquear todo menos GET.
+const isAdmin = ((req, res, next) => {
+    const isAdmin = req.headers["isadmin"]
+    let needsAuth = false
+    if (req.method == "POST" || req.method == "PUT" || req.method == "DELETE"){
+        needsAuth = true
+    }
+
+    if (needsAuth && isAdmin == "true"){
+        next()
+    }
+    else if(!needsAuth){
+        next()
+    }
+    if(needsAuth && (isAdmin == null || isAdmin != "true")){
+        res.send({
+            error: -1,
+            descripcion: `ruta ${req.method} ${req.originalUrl} no autorizada`
+         })
+    }
+})
 
 
-router.get('/', (req, res)=>{
+router.get('/', isAdmin, (req, res)=>{
     let currentData = contenedor.getAll()
     if(currentData){
         res.send(currentData)
@@ -20,7 +40,7 @@ router.get('/', (req, res)=>{
 
 })
 
-router.get('/:id', (req, res)=>{
+router.get('/:id', isAdmin, (req, res)=>{
     const currentData = contenedor.getbyId(parseInt(req.params.id))
     if(currentData){
         res.send(currentData)
@@ -30,7 +50,7 @@ router.get('/:id', (req, res)=>{
     }
 })
 
-router.post('/', (req, res)=>{
+router.post('/', isAdmin, (req, res)=>{
     const product = req.body
     contenedor.save(product)
     const allProducts = contenedor.getAll()
@@ -38,7 +58,7 @@ router.post('/', (req, res)=>{
     res.send(`Se guardo el objeto. El ID asignado es ${id}`)
 })
 
-router.put('/:id', (req, res) =>{
+router.put('/:id', isAdmin, (req, res) =>{
     const product = req.body
     const id = parseInt(req.params.id)
     if(contenedor.getbyId(id)){
@@ -52,7 +72,7 @@ router.put('/:id', (req, res) =>{
 
 })
 
-router.delete('/:id', (req, res) =>{
+router.delete('/:id', isAdmin, (req, res) =>{
     const id = parseInt(req.params.id)
     if(contenedor.getbyId(id)){
         contenedor.deleteById(id)

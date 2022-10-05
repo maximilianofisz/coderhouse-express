@@ -42,30 +42,6 @@ app.use((req, res, next) => {
     next()
 })
 
-// Middleware para autorizar o no ciertas rutas. Queda hardcodeado para bloquear todo menos GET.
-app.use((req, res, next) => {
-    const isAdmin = req.headers["isadmin"]
-    let needsAuth = false
-    if (req.method == "POST" || req.method == "PUT" || req.method == "DELETE"){
-        needsAuth = true
-    }
-
-    if (needsAuth && isAdmin == "true"){
-        next()
-    }
-    else if(!needsAuth){
-        next()
-    }
-    if(needsAuth && (isAdmin == null || isAdmin != "true")){
-        res.send({
-            error: -1,
-            descripcion: `ruta ${req.method} ${req.originalUrl} no autorizada`
-         })
-    }
-})
-
-
-
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
