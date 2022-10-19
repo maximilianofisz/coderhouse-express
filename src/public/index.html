@@ -17,12 +17,21 @@
     <section class="input-productos">
         <hr>
         <h1>Ingresar un producto</h1>
-        <form action="/productos" method="post" target="dummyframe">
-            <label for="title">Title:</label><br>
-            <input type="text" id="title" name="title"><br><br>
+        <form action="api/productos" method="post" target="dummyframe">
+            <label for="nombre">Nombre::</label><br>
+            <input type="text" id="nombre" name="nombre"><br><br>
 
-            <label for="price">Price:</label><br>
-            <input type="number" id="price" name="price"><br><br>
+            <label for="descripcion">Descripcion:</label><br>
+            <input type="text" id="descripcion" name="descripcion"><br><br>
+
+            <label for="precio">Precio:</label><br>
+            <input type="number" id="precio" name="precio"><br><br>
+
+            <label for="codigo">Codigo:</label><br>
+            <input type="number" id="codigo" name="codigo"><br><br>
+
+            <label for="stock">Stock:</label><br>
+            <input type="number" id="stock" name="stock"><br><br>
 
             <label for="thumbnail">Thumbnail:</label><br>
             <input type="text" id="thumbnail" name="thumbnail"><br><br>
@@ -30,7 +39,7 @@
             <input class="submitProducto" type="submit" value="Submit">
         </form>
         <br>
-        <a href="/productos"><button type="button">Lista de productos</button></a>
+        <a href="api/productos"><button type="button">Lista de productos</button></a>
         <hr>
     </section>
 
@@ -46,14 +55,21 @@
             <table>
                 <tr>
                     <th>Producto</th>
+                    <th>Descripcion</th>
                     <th>Precio</th>
                     <th>Foto</th>
+                    <th>Codigo</th>
+                    <th>Stock</th>
                 </tr>
                 {{#each data}}
                     <tr>
-                        <td>{{this.title}}</td>
-                        <td>${{this.price}}</td>
+                        <td>{{this.nombre}}</td>
+                        <td>{{this.descripcion}}</td>
+                        <td>${{this.precio}}</td>
                         <td><img src={{this.thumbnail}}></td>
+                        <td>{{this.codigo}}</td>
+                        <td>{{this.stock}}</td>
+                        
                     </tr>
                 {{/each}}    
             </table>

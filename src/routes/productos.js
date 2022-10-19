@@ -1,10 +1,21 @@
 const express = require('express')
 const router = express.Router()
 const random = require('random')
-const Contenedor = require('../helpers/contenedor-sync.js')
+/* const Contenedor = require('./helpers/contenedor-sync.js') */
 
+const SQLHelper = require('../helpers/sql-helper.js')
 
-const contenedor = new Contenedor('src/data/productos.txt')
+const mariadb = new SQLHelper({
+    client: "mysql",
+    connection: {
+        host: "127.0.0.1",
+        user: "root",
+        password: "root",
+        database: "coderhouse"
+    }
+}, "productos")
+
+/* const contenedor = new Contenedor('src/data/productos.txt') */
 
 // Middleware para autorizar o no ciertas rutas. Queda hardcodeado para bloquear todo menos GET.
 const isAdmin = ((req, res, next) => {
@@ -29,8 +40,16 @@ const isAdmin = ((req, res, next) => {
 })
 
 
-router.get('/', isAdmin, (req, res)=>{
-    let currentData = contenedor.getAll()
+router.get('/', isAdmin, async (req, res)=>{
+    let currentData
+
+    try{
+        currentData = mariadb.getAll()
+    }
+    catch (err){
+        console.log(err)
+    }
+
     if(currentData){
         res.send(currentData)
     }
@@ -40,7 +59,7 @@ router.get('/', isAdmin, (req, res)=>{
 
 })
 
-router.get('/:id', isAdmin, (req, res)=>{
+router.get('/:id', (req, res)=>{
     const currentData = contenedor.getbyId(parseInt(req.params.id))
     if(currentData){
         res.send(currentData)
@@ -50,15 +69,16 @@ router.get('/:id', isAdmin, (req, res)=>{
     }
 })
 
-router.post('/', isAdmin, (req, res)=>{
+router.post('/', async (req, res)=>{
     const product = req.body
-    contenedor.save(product)
-    const allProducts = contenedor.getAll()
-    const id = allProducts[allProducts.length-1]["id"]
-    res.send(`Se guardo el objeto. El ID asignado es ${id}`)
+    await mariadb.insert(product)
+    const io = req.app.get('socketio')
+    const allProducts = await mariadb.getAll()
+    io.sockets.emit("currentProducts", allProducts)
+    res.send(`Se guardo el objeto.`)
 })
 
-router.put('/:id', isAdmin, (req, res) =>{
+router.put('/:id', (req, res) =>{
     const product = req.body
     const id = parseInt(req.params.id)
     if(contenedor.getbyId(id)){
@@ -72,7 +92,7 @@ router.put('/:id', isAdmin, (req, res) =>{
 
 })
 
-router.delete('/:id', isAdmin, (req, res) =>{
+router.delete('/:id', (req, res) =>{
     const id = parseInt(req.params.id)
     if(contenedor.getbyId(id)){
         contenedor.deleteById(id)
