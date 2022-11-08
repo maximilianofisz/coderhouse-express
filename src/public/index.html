@@ -7,6 +7,7 @@
     <title>Inicio</title>
     <link rel="stylesheet" href="./style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/normalizr@3.6.1/dist/normalizr.browser.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/index.js" defer></script>
@@ -79,20 +80,36 @@
 
     <section class="centro-mensajes" >
         <div>
-            <h1>Centro de mensajes</h1>
-            <label>Correo electronico</label>
+            <h1>Chat</h1>
+            <label>Email</label>
             <input type="email" id="email" name="email" style="opacity: 50%">
+            <br>
+            <label>Name</label>
+            <input type="text" id="name" name="name" style="opacity: 50%">
+            <br>
+            <label>Last name</label>
+            <input type="text" id="lastname" name="lastname" style="opacity: 50%">
+            <br>
+            <label>Age</label>
+            <input type="number" id="age" name="age" style="opacity: 50%">
+            <br>
+            <label>Username</label>
+            <input type="text" id="username" name="username" style="opacity: 50%">
+            <br>
+            <label>Avatar</label>
+            <input type="text" id="avatar" name="avatar" style="opacity: 50%">
         </div>
         <br>
 
         <div class="lista-mensajes">
             <script id="lista-mensajes" type="text/x-handlebars-template">
                 <ul>
-                    {{#each mensajes}}
+                    {{#each msgs}}
                     <li>
-                        <span class="textoCorreo">{{this.correo}}</span>
-                        <span class="textoFecha">{{this.fecha}}</span>
-                        <span class="textoMensaje">{{this.mensaje}}</span>
+                        <span class="textEmail">{{this.author.0.id}}</span>
+                        <span class="textDate">{{this.date}}</span>
+                        <span class="textMsg">{{this.text}}</span>
+
                     </li>
                     {{/each}}
                 </ul>
@@ -100,8 +117,8 @@
         </div>
         
         <div>
-            <label>Mensaje</label>
-            <input type="text" id="mensaje" name="mensaje" style="opacity: 50%">
+            <label>Message</label>
+            <input type="text" id="msg" name="msg" style="opacity: 50%">
             <button class="submitMensaje" type="button">Enviar</button>
         </div>
         <hr>

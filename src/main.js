@@ -2,16 +2,27 @@ const express = require('express')
 const { Server: HttpServer } = require('http')
 const { Server: IOServer } = require('socket.io')
 const moment = require('moment/moment')
+const mongoose = require('mongoose')
+const normalizr = require('normalizr')
+const Schema = normalizr.schema
+const util = require("util")
 
 const SQLHelper = require('./helpers/sql-helper')
+const MongoHelper = require('./helpers/moongose-helper')
 
-const sqlite = new SQLHelper({
-    client: "sqlite3",
-    connection: {
-    filename: "src/ecommerce/mensajes.sqlite"
-    },
-    useNullAsDefault: true
-}, "mensajes")
+
+
+
+
+
+
+
+let msgsHelper = new MongoHelper("mensajes", mongoose.Schema({
+    text: {type: String, required: true},
+    date: {type: String, required: true},
+    author: {type: Array, required: true},
+}))
+
 
 const mariadb = new SQLHelper({
     client: "mysql",
@@ -24,11 +35,6 @@ const mariadb = new SQLHelper({
 }, "productos")
 
 
-const Contenedor = require('./helpers/contenedor-sync.js')
-
-
-/* const contenedor = new Contenedor('src/data/productos.txt')
-const mensajero = new Contenedor('src/data/mensajes.txt') */
 
 
 const productosRouter = require('./routes/productos.js')
@@ -98,37 +104,51 @@ io.on('connection', async (socket) => {
         console.log(err)
     }
 
-    let mensajes
+    let msgs
     try{
-        mensajes = await sqlite.getAll()
+        msgs = await msgsHelper.getAll()
     }
     catch (err){
         console.log(err)
     }
 
+    data = {
+        id: 1,
+        msgs: msgs
+    }
+
+    const authorSchema = new normalizr.schema.Entity("authors")
+    const msgSchema = new normalizr.schema.Entity("msgs") 
+    const dataSchema = new normalizr.schema.Entity("data", {
+        author: authorSchema,
+        msgs: [msgSchema]
+    })
+
+    const normalized = normalizr.normalize(data, dataSchema)
+
     socket.emit("currentProducts", products)
-    socket.emit("currentMessages", mensajes)
+    socket.emit("currentMessages", normalized)
 
     /* Guardo un nuevo mensaje y actualizo a todos los usuarios */
-    socket.on("newMessage", async mensaje =>{
-        mensaje.fecha = "[" + moment().format('MMMM Do YYYY, h:mm:ss a') + "]"
+    socket.on("newMessage", async msg =>{
+        msg.date = "[" + moment().format('MMMM Do YYYY, h:mm:ss a') + "]"
 
         try{
-            sqlite.insert(mensaje)
+            await msgsHelper.insert(msg)
         }
         catch (err) {
             console.log(err)
         }
 
-        let mensajes
+        let msgs
         try{
-            mensajes = await sqlite.getAll()
+            msgs = await msgsHelper.getAll()
         }
         catch (err){
             console.log(err)
         }
         
-        io.sockets.emit("currentMessages", mensajes)
+        io.sockets.emit("currentMessages", msgs)
     })
 
 

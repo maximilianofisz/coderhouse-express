@@ -10,14 +10,14 @@ img{
 ul{
   list-style-type: none;
 }
-.textoCorreo{
+.textEmail{
   color:blue;
   font-weight: 900;
 }
-.textoFecha{
+.textDate{
   color:brown;
 }
-.textoMensaje{
+.textMsg{
   color: green;
   font-style: italic;
 }

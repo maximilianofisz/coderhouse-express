@@ -1,4 +1,14 @@
 const socket = io()
+const norm = normalizr()
+
+const authorSchema = new normalizr.schema.Entity("authors")
+const msgSchema = new normalizr.schema.Entity("msgs") 
+const dataSchema = new normalizr.schema.Entity("data", {
+    author: authorSchema,
+    msgs: [msgSchema]
+})
+
+
 
 /* Me traigo los templates y los compilo, listos para pasarles valores y render */
 let emptyTemplateProductos = $("#lista-productos").html()
@@ -14,9 +24,11 @@ socket.on('currentProducts', (data) =>{
 
 })
 
-socket.on('currentMessages', (mensajes) =>{
+socket.on('currentMessages', (msgs) =>{
     /* render */
-    $(".lista-mensajes").html(compiledMensajes({mensajes: mensajes}))
+    msgs = normalizr.denormalize(msgs.result, dataSchema, msgs.entities )
+
+    $(".lista-mensajes").html(compiledMensajes({msgs: msgs}))
 
 })
 
@@ -33,16 +45,30 @@ buttonProductos.addEventListener("click", function(){
 let buttonMensajes = document.querySelector(".submitMensaje")
 buttonMensajes.addEventListener("click", function(){
     let emailValue = document.getElementById("email").value
-    let mensajeValue = document.getElementById("mensaje").value
-    if(emailValue && mensajeValue){
-        let mensaje = {
-            correo: emailValue,
-            mensaje: mensajeValue
+    let nameValue = document.getElementById("name").value
+    let lastNameValue = document.getElementById("lastname").value
+    let ageValue = document.getElementById("age").value
+    let usernameValue = document.getElementById("username").value
+    let avatarValue = document.getElementById("avatar").value
+    let msgValue = document.getElementById("msg").value
+
+
+    if(emailValue && nameValue && lastNameValue && ageValue && usernameValue && avatarValue && msgValue){
+        let msg = {
+            text: msgValue,
+            author: {
+                id: emailValue,
+                name: nameValue,
+                lastname: lastNameValue,
+                age: ageValue,
+                username: usernameValue,
+                avatar: avatarValue
+            }
         }
-        socket.emit('newMessage', mensaje)
+        socket.emit('newMessage', msg)
     }
     else{
-        alert("Es necesario ingresar un correo electronico y un mensaje para ingresar al chat")
+        alert("Es necesario ingresar todos los datos del formulario para enviar un mensaje")
     }
 })
 
