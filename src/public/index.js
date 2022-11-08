@@ -1,5 +1,4 @@
 const socket = io()
-const norm = normalizr()
 
 const authorSchema = new normalizr.schema.Entity("authors")
 const msgSchema = new normalizr.schema.Entity("msgs") 
@@ -26,9 +25,13 @@ socket.on('currentProducts', (data) =>{
 
 socket.on('currentMessages', (msgs) =>{
     /* render */
-    msgs = normalizr.denormalize(msgs.result, dataSchema, msgs.entities )
+    let data = normalizr.denormalize(msgs.result, dataSchema, msgs.entities )
+    let compressText = document.querySelector(".compress")
+    let compressLevel = (100 - (JSON.stringify(data).length * 100) / JSON.stringify(msgs).length).toPrecision(3)
+    compressText.innerText = "CHAT (" + compressLevel + "% comprimido)"
 
-    $(".lista-mensajes").html(compiledMensajes({msgs: msgs}))
+
+    $(".lista-mensajes").html(compiledMensajes({msgs: data.msgs}))
 
 })
 

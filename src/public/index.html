@@ -80,7 +80,7 @@
 
     <section class="centro-mensajes" >
         <div>
-            <h1>Chat</h1>
+            <h1 class="compress"></h1>
             <label>Email</label>
             <input type="email" id="email" name="email" style="opacity: 50%">
             <br>
@@ -106,9 +106,9 @@
                 <ul>
                     {{#each msgs}}
                     <li>
-                        <span class="textEmail">{{this.author.0.id}}</span>
-                        <span class="textDate">{{this.date}}</span>
-                        <span class="textMsg">{{this.text}}</span>
+                        <span class="textEmail">{{this._doc.author.0.id}}</span>
+                        <span class="textDate">{{this._doc.date}}</span>
+                        <span class="textMsg">{{this._doc.text}}</span>
 
                     </li>
                     {{/each}}
