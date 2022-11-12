@@ -4,13 +4,11 @@ const { Server: IOServer } = require('socket.io')
 const moment = require('moment/moment')
 const mongoose = require('mongoose')
 const normalizr = require('normalizr')
-const Schema = normalizr.schema
-const util = require("util")
-
+const cookieParser = require('cookie-parser')
+const session = require('express-session')
 const SQLHelper = require('./helpers/sql-helper')
 const MongoHelper = require('./helpers/moongose-helper')
-
-
+const MongoStore = require('connect-mongo')
 
 
 
@@ -47,6 +45,24 @@ const app = express()
 const httpServer = new HttpServer(app)
 const io = new IOServer(httpServer)
 const bodyParser = require('body-parser')
+
+app.use(cookieParser())
+app.use(session({
+    store: MongoStore.create({
+        mongoUrl: "mongodb+srv://coder:house@cluster0.4fvrhxv.mongodb.net/?retryWrites=true&w=majority",
+        autoRemove: 'native',
+        ttl: 60 * 10,
+        mongoOptions: {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        }
+        
+    }),
+    secret: "coderhouse",
+    resave: false,
+    saveUninitialized: false
+}))
+
 
 
 app.engine("hbs",
