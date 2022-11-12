@@ -34,7 +34,7 @@ const mariadb = new SQLHelper({
 
 
 
-
+const homeRouter = require('./routes/home.js')
 const productosRouter = require('./routes/productos.js')
 const carritoRouter = require('./routes/carrito.js')
 const productosTestRouter = require("./routes/productosTest.js")
@@ -92,7 +92,8 @@ app.use(bodyParser.urlencoded({
     extended: true
 }))
 
-app.use(express.static('src/public'))
+/* app.use(express.static('src/public')) */
+
 app.use("/api/productos", productosRouter)
 app.use("/api/carrito", carritoRouter)
 app.use("/api/productos-test", productosTestRouter)
