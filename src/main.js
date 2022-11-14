@@ -51,7 +51,7 @@ app.use(session({
     store: MongoStore.create({
         mongoUrl: "mongodb+srv://coder:house@cluster0.4fvrhxv.mongodb.net/?retryWrites=true&w=majority",
         autoRemove: 'native',
-        ttl: 60 * 10,
+        ttl: 10 * 60,
         mongoOptions: {
             useNewUrlParser: true,
             useUnifiedTopology: true
@@ -59,7 +59,7 @@ app.use(session({
         
     }),
     secret: "coderhouse",
-    resave: false,
+    resave: true,
     saveUninitialized: false
 }))
 
@@ -94,6 +94,7 @@ app.use(bodyParser.urlencoded({
 
 /* app.use(express.static('src/public')) */
 
+app.use(homeRouter)
 app.use("/api/productos", productosRouter)
 app.use("/api/carrito", carritoRouter)
 app.use("/api/productos-test", productosTestRouter)
