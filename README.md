@@ -1,11 +1,4 @@
 # Coderhouse: Desafio con Express
-## Requisitos
-* Tener un servidor MySQL corriendo en localhost:3306
-* Tener un usuario de administrador con credenciales "root":"root". Se puede modoficiar esto en los archivos siguientes para evitar la creacion de un nuevo usuario :)
-* Ejecutar los siguentes scripts en orden:
-    * createDB-maria.js
-    * createTB-maria.js
-
 ## Iniciar el proyecto
 ```
 npm run start
