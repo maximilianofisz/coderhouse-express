@@ -27,7 +27,7 @@ buttonProductos.addEventListener("click", function(){
 
 
 function logOut(){
-    window.location = "/logout"
+    window.location = "/accounts/logout"
 }
 let logOutBtn = document.querySelector('.btnLogout')
 logOutBtn.addEventListener('click', logOut)

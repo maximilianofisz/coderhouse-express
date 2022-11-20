@@ -1,11 +1,16 @@
 <section>
     <h1>Log in</h1>
-    <form action="/login" method="post">
+    <form action="/accounts/login" method="post">
         <label for="username">Enter your username:</label><br>
         <input type="text" id="username" name="username" required><br><br>
+
+        <label for="username">Enter your password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        
         <input class="submitBtn" type="submit" value="Submit">
     </form>
 </section>
 
-<script>
-</script>
+<section>
+    <h3>Not an user? Register <a href="/accounts/register">here</a></h3>
+</section>

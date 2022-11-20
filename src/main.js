@@ -8,6 +8,7 @@ const MongoStore = require('connect-mongo')
 
 
 const homeRouter = require('./routes/home.js')
+const accountsRouter = require('./routes/accounts')
 
 /* const productosRouter = require('./routes/productos.js')
 const carritoRouter = require('./routes/carrito.js')
@@ -19,6 +20,8 @@ const app = express()
 const httpServer = new HttpServer(app)
 const io = new IOServer(httpServer)
 const bodyParser = require('body-parser')
+const { config } = require('process')
+const passport = require('passport')
 
 app.use(cookieParser())
 app.use(session({
@@ -36,6 +39,9 @@ app.use(session({
     resave: true,
     saveUninitialized: false
 }))
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.engine("hbs",
  handlebars.engine({
@@ -56,6 +62,11 @@ app.use((req, res, next) => {
     next()
 })
 
+/* app.use((req, res, next) => {
+    console.log(req.session.passport)
+    next()
+}) */
+
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
@@ -65,6 +76,8 @@ app.use(bodyParser.urlencoded({
 app.use(express.static('src/scripts'))
 
 app.use(homeRouter)
+app.use("/accounts", accountsRouter)
+
 /* app.use("/api/productos", productosRouter)
 app.use("/api/carrito", carritoRouter)
 app.use("/api/productos-test", productosTestRouter) */

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-mongoose.connect("mongodb://localhost:27017/ecommerce")
+mongoose.connect("mongodb+srv://coder:house@cluster0.4fvrhxv.mongodb.net/?retryWrites=true&w=majority")
 
 class mongooseHelper{
     constructor(collection, schema){
@@ -21,6 +21,7 @@ class mongooseHelper{
     async insert(data){
         const model = new this.collection(data)
         await model.save()
+        return model._id
 
     }
 

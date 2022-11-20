@@ -2,8 +2,18 @@ const express = require('express')
 const router = express.Router()
 const SQLHelper = require('../helpers/sql-helper.js')
 const path = require('path')
+const MongooseHelper = require('../helpers/moongose-helper.js')
+const Schema = require('mongoose').Schema
 
-const mariadb = new SQLHelper({
+const productSchema = new Schema({
+    name: {type: String, required: true},
+    price: {type: Number, required: true},
+    thumbnail: {type: String, required: true}
+})
+
+const productsHelper = new MongooseHelper("products", productSchema)
+
+/* const mariadb = new SQLHelper({
     client: "mysql",
     connection: {
         host: "127.0.0.1",
@@ -11,62 +21,49 @@ const mariadb = new SQLHelper({
         password: "root",
         database: "coderhouse"
     }
-}, "productos")
+}, "productos") */
 
-
-
-router.get('/', async (req, res)=>{
-
-    if(!req.session.login){
-        res.render("login", {layout: false})
+function isAuth(req, res, next) {
+    console.log(req.isAuthenticated())
+    if (req.isAuthenticated()) {
+        next()
     }
-    else{
-        const io = req.app.get('socketio')
-        let products
-        try{
-            products = await mariadb.getAll()
-        }
-        catch (err){
-            console.log(err)
-        }
-        let name = req.session.name
-        io.on('connection', async (socket) => {            
+    else {
+        res.redirect("/accounts/login")
+    }
+}
+
+router.get('/', isAuth, async (req, res)=>{
+    const io = req.app.get('socketio')
+    let products
+    try{
+        products = await productsHelper.getAll()
+    }
+    catch (err){
+        console.log(err)
+    }
+    let name = req.user.username
+    res.sendFile(path.join(__dirname, '..', '..', 'src/views/home.html'))
+    try {
+        io.on('connection', async (socket) => {         
             socket.emit("currentData", name)
             socket.emit("currentProducts", products)
         })
-        res.sendFile(path.join(__dirname, '..', '..', 'src/views/home.html'))
+    }
+    catch (err) {
+        console.log("Failed to connect socket" + err)
     }
 })
 
-router.post('/', async (req, res)=>{
+router.post('/', isAuth, async (req, res)=>{
     const product = req.body
-    await mariadb.insert(product)
+    console.log(product)
+    await productsHelper.insert(product)
     const io = req.app.get('socketio')
-    const allProducts = await mariadb.getAll()
+    const allProducts = await productsHelper.getAll()
     io.sockets.emit("currentProducts", allProducts)
     res.send(`Se guardo el objeto.`)
 })
-
-
-router.post('/login', async (req, res)=>{
-    req.session.login = true
-    req.session.name = req.body.username
-    res.redirect("/")    
-})
-
-router.get('/logout', async (req, res) => {
-    if(!req.session.login){
-        res.render("login", {layout: false})
-    }
-    else{
-        let name = req.session.name
-        req.session.destroy()
-        res.render('logout', {data: name, layout: false})
-    }
-
-})
-
-
 
 module.exports = router
 

@@ -37,11 +37,11 @@
             <hr>
             <h1>Create a product</h1>
             <form action="/" method="post" target="dummyframe">
-                <label for="nombre">Name:</label><br>
-                <input type="text" id="nombre" name="nombre"><br><br>
+                <label for="Name">Name:</label><br>
+                <input type="text" id="name" name="name"><br><br>
 
-                <label for="precio">Price:</label><br>
-                <input type="number" id="precio" name="precio"><br><br>
+                <label for="Price">Price:</label><br>
+                <input type="number" id="price" name="price"><br><br>
 
                 <label for="thumbnail">Thumbnail:</label><br>
                 <input type="text" id="thumbnail" name="thumbnail"><br><br>
@@ -64,14 +64,15 @@
                     </tr>
                     {{#each data}}
                         <tr>
-                            <td>{{this.nombre}}</td>
-                            <td>${{this.precio}}</td>
+                            <td>{{this.name}}</td>
+                            <td>${{this.price}}</td>
                             <td><img src={{this.thumbnail}}></td>
                         </tr>
                     {{/each}}    
                 </table>
             </script>
         </section>
+        <hr>
     </body>
 </html>
 
