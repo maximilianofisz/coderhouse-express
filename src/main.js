@@ -4,7 +4,8 @@ const { Server: IOServer } = require('socket.io')
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')
-
+require('dotenv').config()
+console.log("Environmental variables", (process.env.STATE || "not loaded") )
 
 
 
@@ -24,11 +25,12 @@ const passport = require('passport')
 
 const homeRouter = require('./routes/home.js')(io)
 const accountsRouter = require('./routes/accounts')
+const internalRouter = require('./routes/internal')
 
 app.use(cookieParser())
 app.use(session({
     store: MongoStore.create({
-        mongoUrl: "mongodb+srv://coder:house@cluster0.4fvrhxv.mongodb.net/?retryWrites=true&w=majority",
+        mongoUrl: process.env.MONGOURL,
         autoRemove: 'native',
         ttl: 10 * 60,
         mongoOptions: {
@@ -41,6 +43,7 @@ app.use(session({
     resave: true,
     saveUninitialized: false
 }))
+
 
 app.use(passport.initialize())
 app.use(passport.session())
@@ -64,10 +67,6 @@ app.use((req, res, next) => {
     next()
 })
 
-/* app.use((req, res, next) => {
-    console.log(req.session.passport)
-    next()
-}) */
 
 
 app.use(bodyParser.json())
@@ -79,6 +78,7 @@ app.use(express.static('src/scripts'))
 
 app.use(homeRouter)
 app.use("/accounts", accountsRouter)
+app.use("/internal", internalRouter)
 
 /* app.use("/api/productos", productosRouter)
 app.use("/api/carrito", carritoRouter)
@@ -94,9 +94,9 @@ app.all("*", (req, res) => {
     }))
  });
 
- 
-httpServer.listen(8080, ()=>{
-    console.log("App started and listening on port 8080 :)")
+const PORT = process.argv[2] || 8080
+httpServer.listen(PORT, ()=>{
+    console.log(`App started and listening on port ${PORT} :)`)
 })
 
 

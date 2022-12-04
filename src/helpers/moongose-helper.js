@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-mongoose.connect("mongodb+srv://coder:house@cluster0.4fvrhxv.mongodb.net/?retryWrites=true&w=majority")
+mongoose.connect(process.env.MONGOURL)
 
 class mongooseHelper{
     constructor(collection, schema){

@@ -23,7 +23,6 @@ module.exports = function(io){
     
 
     function isAuth(req, res, next) {
-        console.log(req.isAuthenticated())
         if (req.isAuthenticated()) {
             next()
         }
