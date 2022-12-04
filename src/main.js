@@ -7,8 +7,7 @@ const MongoStore = require('connect-mongo')
 
 
 
-const homeRouter = require('./routes/home.js')
-const accountsRouter = require('./routes/accounts')
+
 
 /* const productosRouter = require('./routes/productos.js')
 const carritoRouter = require('./routes/carrito.js')
@@ -20,8 +19,11 @@ const app = express()
 const httpServer = new HttpServer(app)
 const io = new IOServer(httpServer)
 const bodyParser = require('body-parser')
-const { config } = require('process')
 const passport = require('passport')
+
+
+const homeRouter = require('./routes/home.js')(io)
+const accountsRouter = require('./routes/accounts')
 
 app.use(cookieParser())
 app.use(session({

@@ -5,7 +5,6 @@ const { Mongoose, default: mongoose } = require('mongoose')
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const BcryptHelper = require('../helpers/bcrypt-helper')
-const MongoHelper = require('../helpers/moongose-helper')
 const MongoSchema = require('mongoose').Schema
 const bcryptHelper = new BcryptHelper()
 
@@ -14,8 +13,6 @@ const schema = new MongoSchema({
     email: {type: String, required: true},
     password: {type: String, required: true},
 })
-
-const usersHelper = new MongoHelper("users", schema)
 
 const Users = mongoose.model("user", schema)
 
@@ -90,7 +87,12 @@ router.post("/register", passport.authenticate('register', {failureRedirect: "/a
 
 
 router.get("/login", async (req, res) => {
-    res.render("login", {layout: false})
+    if (req.isAuthenticated()) {
+        res.redirect("/")
+    }
+    else {
+        res.render("login", {layout: false})
+    }    
 })
 
 router.post('/login', passport.authenticate('login', {failureRedirect: "/accounts/incorrectcreds"}), async (req, res)=> {
@@ -107,11 +109,11 @@ router.get("/existingcreds", async (req, res) => {
 })
 
 router.get('/logout', async (req, res) => {
+    res.render("logout", {data: req.user.username, layout: false})
     req.logout((err) => {
         if (err) {
             return next(err)
         }
-        res.redirect("/accounts/login")
     })
 })
 

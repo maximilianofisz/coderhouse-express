@@ -13,14 +13,28 @@
         border:1px solid black;
         }
         img{
-        width: 50%;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
+            width: 20%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        ul{
+        list-style-type: none;
+        }
+        .textEmail{
+        color:blue;
+        font-weight: 900;
+        }
+        .textDate{
+        color:brown;
+        }
+        .textMsg{
+        color: green;
+        font-style: italic;
         }
         </style>
     </head>
-    <body>
+    <body style="background-color: #f0ced6;">
         <section>
         <div>
             <button type="button" class="btnLogout">Log out</button>
@@ -73,6 +87,30 @@
             </script>
         </section>
         <hr>
+
+        <section class="centro-mensajes">
+            <h1>Chat</h1>
+            <div class="list-msgs">
+                <script id="list-msgs" type="text/x-handlebars-template">
+                    <ul>
+                        {{#each msgs}}
+                        <li>
+                            <span class="textEmail">{{this.author.0.name}}</span>
+                            <span class="textDate">{{this.date}}</span>
+                            <span class="textMsg">{{this.text}}</span>
+    
+                        </li>
+                        {{/each}}
+                    </ul>
+                </script>
+            </div>
+            
+            <div>
+                <label>Message:</label>
+                <input type="text" id="msg" name="msg" style="opacity: 50%">
+                <button class="submitMensaje" type="button">Enviar</button>
+            </div>
+        </section>
     </body>
 </html>
 
