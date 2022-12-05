@@ -26,6 +26,7 @@ const passport = require('passport')
 const homeRouter = require('./routes/home.js')(io)
 const accountsRouter = require('./routes/accounts')
 const internalRouter = require('./routes/internal')
+const randomsRouter = require('./routes/randoms')
 
 app.use(cookieParser())
 app.use(session({
@@ -79,6 +80,7 @@ app.use(express.static('src/scripts'))
 app.use(homeRouter)
 app.use("/accounts", accountsRouter)
 app.use("/internal", internalRouter)
+app.use("/api/randoms", randomsRouter)
 
 /* app.use("/api/productos", productosRouter)
 app.use("/api/carrito", carritoRouter)
