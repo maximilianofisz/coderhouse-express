@@ -13,6 +13,8 @@ Probablemente utilize el motor de plantillas Handlebars porque es el mas minimal
 * GET /accounts/logout
 * GET /accounts/incorrectcreds
 * GET /accounts/existingcreds
+* GET /internal/info
+* GET /api/randoms
 
 ## Definiciones
 | Version de artefacto | Puerto |
