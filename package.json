@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon src/main.js",
-    "start-pug": "nodemon src-pug/main.js",
-    "start-ejs": "nodemon src-ejs/main.js"
+    "fork": "pm2 start forkedStart.config.js",
+    "cluster": "pm2 start clusterStart.config.js"
   },
   "repository": {
     "type": "git",
@@ -40,6 +40,7 @@
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "path": "^0.12.7",
+    "pm2": "^5.2.2",
     "pug": "^3.0.2",
     "random": "^3.0.6",
     "socket.io": "^4.5.2",

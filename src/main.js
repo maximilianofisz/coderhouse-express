@@ -4,6 +4,9 @@ const { Server: IOServer } = require('socket.io')
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')
+const cluster = require('cluster')
+const http = require('http')
+const CPUs = require('os').cpus().length
 require('dotenv').config()
 console.log("Environmental variables", (process.env.STATE || "not loaded") )
 
@@ -96,10 +99,46 @@ app.all("*", (req, res) => {
     }))
  });
 
-const PORT = process.argv[2] || 8080
+const PORT = process.env.PORT || 8080
+const clusterMode = process.argv[3] || 'fork'
+console.log(__dirname)
+
+/* if (clusterMode == 'cluster'){
+    if (cluster.isPrimary){
+        console.log('App started in cluster mode')
+        console.log(`Master ${process.pid} is running`)
+    
+        for (let i = 0; i < CPUs; i++){
+            cluster.fork()
+        }
+    
+        cluster.on('exit', (worker, code, signal) => {
+            console.log(`Worker ${worker.process.pid} has died`)
+        })
+    }
+    else {
+        httpServer.listen(PORT, ()=>{
+            console.log(`App started and listening on port ${PORT} :) - Current PID is ${process.pid}`)
+        })
+    }
+}
+
+else{
+    httpServer.listen(PORT, ()=>{
+        console.log(`App started in forked mode and listening on port ${PORT} :) - Current PID is ${process.pid}`)
+    })
+} */
+
 httpServer.listen(PORT, ()=>{
-    console.log(`App started and listening on port ${PORT} :)`)
+    console.log(`App started and listening on port ${PORT} :) - Current PID is ${process.pid}`)
 })
+
+
+
+
+
+
+
 
 
 
