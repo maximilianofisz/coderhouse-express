@@ -12,5 +12,6 @@ process.on("message", msg => {
 
     }
     process.send(data)
+    process.exit(0)
 })
 
