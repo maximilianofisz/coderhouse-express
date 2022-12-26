@@ -4,8 +4,16 @@ const { Server: IOServer } = require('socket.io')
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')
+const compression = require('compression')
+const pino = require('pino')
+
+const infoLog = pino()
+const warningLog = pino(pino.destination('./warn.log'))
+const errorLog = pino(pino.destination('./error.log'))
+
 require('dotenv').config()
 console.log("Environmental variables", (process.env.STATE || "not loaded") )
+
 
 
 
@@ -22,6 +30,7 @@ const io = new IOServer(httpServer)
 const bodyParser = require('body-parser')
 const passport = require('passport')
 
+app.use(compression())
 
 const homeRouter = require('./routes/home.js')(io)
 const accountsRouter = require('./routes/accounts')
@@ -63,8 +72,9 @@ app.set("views", __dirname + "/views")
 app.set('socketio', io)
 
 //Log time and request
+// /* new Date().toLocaleDateString(), new Date().toLocaleTimeString(), req.method, req.originalUrl */
 app.use((req, res, next) => {
-    console.log(new Date().toLocaleDateString(), new Date().toLocaleTimeString(), req.method, req.originalUrl)
+    infoLog.info({method: req.method, route: req.originalUrl})
     next()
 })
 
@@ -90,6 +100,7 @@ app.use("/api/productos-test", productosTestRouter) */
 // Handleo todo lo no implementado aca
 app.all("*", (req, res) => {
     res.status(404)
+    warningLog.warn({method: req.method, route: req.originalUrl})
     res.end(JSON.stringify({
         error: -2,
         descripcion: `ruta ${req.method} ${req.originalUrl} no implementada`

@@ -4,6 +4,8 @@ const path = require('path')
 const MongooseHelper = require('../helpers/moongose-helper.js')
 const Schema = require('mongoose').Schema
 const moment = require('moment')
+const pino = require('pino')
+const errorLog = pino(pino.destination('./error.log'))
 
 module.exports = function(io){
     const msgSchema = new Schema({
@@ -38,14 +40,14 @@ module.exports = function(io){
             products = await productsHelper.getAll()
         }
         catch (err){
-            console.log(err)
+            errorLog.error({method: req.method, route: req.originalUrl, error: err})
         }
 
         try{
             msgs = await msgHelper.getAll()
         }
         catch (err){
-            console.log(err)
+            errorLog.error({method: req.method, route: req.originalUrl, error: err})
         }
 
         res.sendFile(path.join(__dirname, '..', '..', 'src/views/home.html'))
@@ -65,7 +67,7 @@ module.exports = function(io){
             })
         }
         catch (err) {
-            console.log("Failed to connect socket" + err)
+            errorLog.error({method: req.method, route: req.originalUrl, error: err})
         }
     })
     
