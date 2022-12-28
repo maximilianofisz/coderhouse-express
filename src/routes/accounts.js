@@ -7,6 +7,9 @@ const LocalStrategy = require('passport-local').Strategy
 const BcryptHelper = require('../helpers/bcrypt-helper')
 const MongoSchema = require('mongoose').Schema
 const bcryptHelper = new BcryptHelper()
+const pino = require('pino')
+const errorLog = pino(pino.destination('./error.log'))
+
 
 const schema = new MongoSchema({
     username: {type: String, required: true},
@@ -72,7 +75,13 @@ passport.serializeUser( async (user, done) => {
 })
 
 passport.deserializeUser((id, done) => {
-    Users.findById(id, done)
+    try {
+        Users.findById(id, done)
+    }
+    catch (err) {
+        errorLog.error({method: req.method, route: req.originalUrl, error: err})
+    }
+    
 })
 
 

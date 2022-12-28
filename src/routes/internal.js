@@ -13,7 +13,6 @@ router.get("/info", (req, res) => {
         directory: process.cwd(),
         availableCores: CPUs
     }
-    console.log(data)
     res.send(data)
 })
 

@@ -74,8 +74,20 @@ module.exports = function(io){
     router.post('/', isAuth, async (req, res)=>{
         const product = req.body
         console.log(product)
-        await productsHelper.insert(product)
-        const allProducts = await productsHelper.getAll()
+        try {
+            await productsHelper.insert(product)
+        }
+        catch (err){
+            errorLog.error({method: req.method, route: req.originalUrl, error: err})
+        }
+        
+        try {
+            const allProducts = await productsHelper.getAll()
+        }
+        catch (err){
+            errorLog.error({method: req.method, route: req.originalUrl, error: err})
+        }
+        
         io.sockets.emit("currentProducts", allProducts)
         res.send(`Se guardo el objeto.`)
     })
