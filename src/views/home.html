@@ -32,23 +32,40 @@
         color: green;
         font-style: italic;
         }
+        #profilePicFrame {
+            height: 120px;
+            width: 150px;
+            float: left;
+            clear: both;
+            margin-right: 15px;
+            
+        }
         </style>
     </head>
     <body style="background-color: #f0ced6;">
         <section>
         <div>
+            <img id="profilePicFrame">
             <button type="button" class="btnLogout">Log out</button>
-            <div class="username"></div>
-            <script id="username" type="text/x-handlebars-template">
+            <br>
+            
+            <div class="email"></div>
+            <script id="email" type="text/x-handlebars-template">
                 <h1> Welcome, {{name}}</h1>
             </script>
+            Change your profile picture here!
+            <form id="profilePicSubmit" action="/accounts/uploadProfilePic" method="post" enctype="multipart/form-data">
+                <input id="profilePic" type="file" name="avatar" accept=".png, .jpeg, .jpg">
+            </form>
+            <br>
+            <hr>
             
         </div>
         </section>
 
 <iframe name="dummyframe" id="dummyframe" style="display:none"></iframe>
         <section class="input-products">
-            <hr>
+            
             <h1>Create a product</h1>
             <form action="/" method="post" target="dummyframe">
                 <label for="Name">Name:</label><br>

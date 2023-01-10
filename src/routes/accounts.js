@@ -7,21 +7,51 @@ const LocalStrategy = require('passport-local').Strategy
 const BcryptHelper = require('../helpers/bcrypt-helper')
 const MongoSchema = require('mongoose').Schema
 const bcryptHelper = new BcryptHelper()
+const multer = require('multer')
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "./uploads")
+    },
+    filename: function (req, file, cb) {
+        cb(null, req.user.email + ".png")
+    } 
+})
+const upload = multer({storage: storage})
 const pino = require('pino')
+const infoLog = pino()
 const errorLog = pino(pino.destination('./error.log'))
+
+router.use((req, res, next) => {
+    console.log("OUCHI")
+    infoLog.info(`${req.method} + ${req.originalUrl}`)
+    next()
+})
 
 
 const schema = new MongoSchema({
-    username: {type: String, required: true},
     email: {type: String, required: true},
     password: {type: String, required: true},
+    fullName: {type: String, required: true},
+    adress: {type: String, required: true},
+    age: {type: Number, required: true},
+    phoneNumber: {type: String, required: true}
+
 })
+
+function isAuth(req, res, next) {
+    if (req.isAuthenticated()) {
+        next()
+    }
+    else {
+        res.redirect("/accounts/login")
+    }
+}
 
 const Users = mongoose.model("user", schema)
 
-passport.use('login', new LocalStrategy(
-    (username, password, done) => {
-        Users.findOne({username: username}, (err, user) => {
+passport.use('login', new LocalStrategy({usernameField: 'email'},
+    (email, password, done) => {
+        Users.findOne({email: email}, (err, user) => {
             if (err) {
                 return done(err)
             }
@@ -40,22 +70,27 @@ passport.use('login', new LocalStrategy(
     }
 ))
 
-passport.use('register', new LocalStrategy({passReqToCallback: true},
-    (req, username, password, done) => {
-        Users.findOne({$or: [{username: username}, {email: req.body.email}]}, (err, user) => {
+passport.use('register', new LocalStrategy({usernameField: 'email', passwordField: 'password', passReqToCallback: true},
+    (req, email, password, done) => {
+        console.log("looking for user")
+        Users.findOne({email: email}, (err, user) => {
             if (err) {
                 console.log("Error while registering" + err)
                 return done(err)
             }
             if (user) {
-                console.log("User or email already exists")
+                console.log("Email already exists")
                 return done(null, false)                
             }
             else{
+                console.log("creating user")
                 const newUser = {
-                    username: username,
                     password: bcryptHelper.hashPassword(password),
-                    email: req.body.email                    
+                    email: req.body.email,
+                    fullName: req.body.fullname,
+                    adress: req.body.adress,
+                    age: req.body.age,
+                    phoneNumber: req.body.phonenumber
                 }
                 Users.create(newUser, (err, user) => {
                     if (err) {
@@ -86,6 +121,7 @@ passport.deserializeUser((id, done) => {
 
 
 router.get("/register", async (req, res) => {
+    console.log("rendering!!")
     res.render("register", {layout: false})
 })
 
@@ -109,6 +145,21 @@ router.post('/login', passport.authenticate('login', {failureRedirect: "/account
     res.redirect("/")    
 })
 
+router.post("/uploadProfilePic", upload.single("avatar"), async (req, res) => {
+    console.log("uploaded!")
+    res.redirect("/accounts/profile")
+})
+
+router.get("/profile", isAuth, async (req, res) => {
+    res.render('profile', {layout: false, data: {
+        email: req.user.email,
+        name: req.user.fullName,
+        adress: req.user.adress,
+        age: req.user.age,
+        phone_number: req.user.phoneNumber
+    }})
+})
+
 router.get("/incorrectcreds", async (req, res) => {
     res.render("incorrectcreds", {layout: false})
 })
@@ -118,7 +169,7 @@ router.get("/existingcreds", async (req, res) => {
 })
 
 router.get('/logout', async (req, res) => {
-    res.render("logout", {data: req.user.username, layout: false})
+    res.render("logout", {data: req.user.email, layout: false})
     req.logout((err) => {
         if (err) {
             return next(err)

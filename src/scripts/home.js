@@ -4,7 +4,7 @@ const socket = io()
 /* Me traigo los templates y los compilo, listos para pasarles valores y render */
 let emptyTemplateMsgs = $("#list-msgs").html()
 let emptyTemplateProducts = $("#list-products").html()
-let emptyTemplateName = $("#username").html()
+let emptyTemplateName = $("#email").html()
 
 let compiledMsgs = Handlebars.compile(emptyTemplateMsgs)
 let compiledProducts = Handlebars.compile(emptyTemplateProducts)
@@ -15,7 +15,8 @@ let user
 socket.on('currentUser', (data) =>{
     /* render */
     user = data
-    $(".username").html(compiledName({name: user.username}))
+    $(".email").html(compiledName({name: user.email}))
+    $("#profilePicFrame").attr("src", "http://localhost:9000/" + user.email + ".png")
 })
 
 socket.on('currentProducts', (data) =>{
@@ -45,14 +46,15 @@ buttonMensajes.addEventListener("click", function(){
         text: msgValue,
         author: {
             id: user._id,
-            name: user.username,
             email: user.email
         }
     }
     socket.emit("newMsg", msg)
 })
 
-
+document.getElementById("profilePic").onchange = function() {
+    document.getElementById("profilePicSubmit").submit()
+}
 
 
 function logOut(){

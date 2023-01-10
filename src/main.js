@@ -87,10 +87,9 @@ app.use("/api/productos-test", productosTestRouter) */
 
 // Middlewares
 // Log time and request
-app.use((req, res, next) => {
-    infoLog.info({method: req.method, route: req.originalUrl})
-    next()
-})
+
+
+app.use(express.static("uploads"))
 
 // Handle non-implemented
 app.all("*", (req, res) => {

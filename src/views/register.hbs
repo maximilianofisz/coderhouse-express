@@ -1,16 +1,28 @@
 <h1>Register</h1>
-    <form action="/accounts/register" method="post" class="form">
-        <label for="nombre">Email:</label><br>
+    <form action="/accounts/register" method="post" class="form" {{!-- enctype="multipart/form-data" --}}>
+        <label for="fullname">Full name:</label><br>
+        <input type="text" id="fullname" name="fullname"><br><br>
+
+        <label for="adress">Adress:</label><br>
+        <input type="text" id="adress" name="adress"><br><br>
+
+        <label for="age">Age:</label><br>
+        <input type="number" id="age" name="age"><br><br>
+
+        <label for="phonenumber">Phone number:</label><br>
+        <input type="text" id="phonenumber" name="phonenumber"><br><br>
+
+        <label for="email">Email:</label><br>
         <input type="text" id="email" name="email"><br><br>
 
-        <label for="nombre">Username:</label><br>
-        <input type="text" id="username" name="username"><br><br>
-
-        <label for="precio">Password:</label><br>
+        <label for="password">Password:</label><br>
         <input type="password" id="password" name="password"><br><br>
 
-        <label for="thumbnail">Confirm your password:</label><br>
+        <label for="confpassword">Confirm your password:</label><br>
         <input type="password" id="confpassword" name="confpassword"><br><br>
+
+{{!--         <label for ="avatar">Upload your profile picture:</label><br>
+        <input type="file" name="avatar"/><br><br> --}}
 
         <input class="registerUserBtn" type="submit" value="Submit">
     </form>

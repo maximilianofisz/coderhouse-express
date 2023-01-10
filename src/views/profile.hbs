@@ -1,0 +1,28 @@
+<section>
+<div>
+    <button type="button" class="btnLogout">Log out</button>
+    <h1> Welcome, {{ data.name }}</h1>
+</div>
+</section>
+
+<section>
+    <h2>My profile</h2>
+    <p><b>My email: </b>{{ data.email }}</p><br><br>
+    <p><b>My address: </b>{{ data.address }}</p><br><br>
+    <p><b>My phone number: </b>{{ data.phone_number }}</p><br><br>
+    <p><b>My age is: </b>{{ data.age }}</p><br><br>
+    <img src="http://localhost:9000/{{ data.email }}.png" width="25%" height="25%">
+</section> <br><br>
+
+<section>
+    <form id="profilePicSubmit" action="/accounts/uploadProfilePic" method="post" enctype="multipart/form-data">
+    <label for="photo_url">Change my profile picture</label><br><br>
+    <input id="profilePic" type="file" name="avatar" accept=".png,.jpg,.jpeg"><br>
+    </form>
+</section>
+
+<script>
+    document.getElementById("profilePic").onchange = function() {
+    document.getElementById("profilePicSubmit").submit()
+}
+</script>
