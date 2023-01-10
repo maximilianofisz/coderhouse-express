@@ -16,7 +16,6 @@ socket.on('currentUser', (data) =>{
     /* render */
     user = data
     $(".email").html(compiledName({name: user.email}))
-    $("#profilePicFrame").attr("src", "http://localhost:9000/" + user.email + ".png")
 })
 
 socket.on('currentProducts', (data) =>{

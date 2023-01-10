@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const fs = require('fs')
 const session = require('express-session')
 const { Mongoose, default: mongoose } = require('mongoose')
 const passport = require('passport')
@@ -22,7 +23,6 @@ const infoLog = pino()
 const errorLog = pino(pino.destination('./error.log'))
 
 router.use((req, res, next) => {
-    console.log("OUCHI")
     infoLog.info(`${req.method} + ${req.originalUrl}`)
     next()
 })
@@ -32,7 +32,7 @@ const schema = new MongoSchema({
     email: {type: String, required: true},
     password: {type: String, required: true},
     fullName: {type: String, required: true},
-    adress: {type: String, required: true},
+    address: {type: String, required: true},
     age: {type: Number, required: true},
     phoneNumber: {type: String, required: true}
 
@@ -72,7 +72,6 @@ passport.use('login', new LocalStrategy({usernameField: 'email'},
 
 passport.use('register', new LocalStrategy({usernameField: 'email', passwordField: 'password', passReqToCallback: true},
     (req, email, password, done) => {
-        console.log("looking for user")
         Users.findOne({email: email}, (err, user) => {
             if (err) {
                 console.log("Error while registering" + err)
@@ -83,22 +82,29 @@ passport.use('register', new LocalStrategy({usernameField: 'email', passwordFiel
                 return done(null, false)                
             }
             else{
-                console.log("creating user")
                 const newUser = {
                     password: bcryptHelper.hashPassword(password),
                     email: req.body.email,
                     fullName: req.body.fullname,
-                    adress: req.body.adress,
+                    address: req.body.address,
                     age: req.body.age,
                     phoneNumber: req.body.phonenumber
                 }
-                Users.create(newUser, (err, user) => {
+
+                Users.create(newUser, async (err, user) => {
                     if (err) {
                         return done(err)
                     }
                     else{
-                        console.log(user)
-                        return done(null, user)
+                        await fs.copyFile("uploads/sus.png", "uploads/" + newUser.email + ".png", (err) => {
+                            if (err) {
+                                errorLog.error({method: req.method, route: req.originalUrl, error: err})
+                            }
+                            else {
+                                return done(null, user)
+                            }
+                        })
+                        
                     }
                 })
             }
@@ -151,12 +157,13 @@ router.post("/uploadProfilePic", upload.single("avatar"), async (req, res) => {
 })
 
 router.get("/profile", isAuth, async (req, res) => {
+    let user = await Users.findOne({email: req.user.email})
     res.render('profile', {layout: false, data: {
-        email: req.user.email,
-        name: req.user.fullName,
-        adress: req.user.adress,
-        age: req.user.age,
-        phone_number: req.user.phoneNumber
+        email: user.email,
+        name: user.fullName,
+        address: user.address,
+        age: user.age,
+        phone_number: user.phoneNumber
     }})
 })
 
