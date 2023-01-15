@@ -4,6 +4,8 @@ const { Server: IOServer } = require('socket.io')
 // Dependencias
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
+const mongoose = require('mongoose')
+
 const bodyParser = require('body-parser')
 const passport = require('passport')
 const handlebars = require('express-handlebars')
@@ -13,17 +15,33 @@ const pino = require('pino')
 // Loggers
 const infoLog = pino()
 const warningLog = pino(pino.destination('./warn.log'))
+const errorLog = pino(pino.destination('./error.log'))
 
 
 // Envs
 require('dotenv').config()
 console.log("Environmental variables", (process.env.STATE || "not loaded") )
 
+const Msgs = require('./helpers/msgsHelper.js')
+const Products = require('./helpers/productsHelper.js')
+
+
+
+
+
+
+
+
+
+
+
 
 
 const app = express()
 const httpServer = new HttpServer(app)
 const io = new IOServer(httpServer)
+
+
 
 // Routers (temporalmente aca por la dependencia de 'IO')
 const homeRouter = require('./routes/home.js')(io)
@@ -100,6 +118,47 @@ app.all("*", (req, res) => {
         descripcion: `ruta ${req.method} ${req.originalUrl} no implementada`
     }))
  });
+
+io.on('connection', async (socket) => {       
+    let products
+    let msgs
+    try{
+        products = await Products.find({}).lean()
+        
+    }
+    catch (err){
+        errorLog.error({error: err})
+    }
+    
+    try{
+        msgs = await Msgs.find({}).lean()
+    }
+    catch (err){
+        errorLog.error({error: err})
+    }
+
+    
+
+    socket.emit("currentProducts", products)
+    socket.emit("currentMsgs", msgs)
+    
+    
+
+    /* socket.on("newMsg", async (msg) => {
+        msg.date = `[${moment().format('MMMM Do YYYY, h:mm:ss a')}]`
+        Msgs.create(msg)
+        let msgs = await Msgs.find().lean()
+        io.sockets.emit("currentMsgs", msgs)
+    }) */
+
+    socket.on("newProduct", async (product) => {
+        await Products.create(product)
+        let products = await Products.find().lean()
+        io.sockets.emit("currentProducts", products)
+    })
+})
+
+
 
 // Start
 const PORT = process.env.PORT || 9000

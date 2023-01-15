@@ -1,42 +1,54 @@
-<section>
 <div class="dropdown">
     <button class="dropbtn">Menu</button>
     <div class="dropdown-content">
     <a href="/">Home</a>
-    <a href="/accounts/cart">My cart</a>
+    <a href="/accounts/profile">My account</a>
     <a href="/accounts/logout">Log out</a>
     </div>
     <hr>
-            
+
+
+<div>
+    <h1> Welcome, {{ data.user }}</h1>
+</div>
+
 </div>
 <div>
-    <h1> Welcome, {{ data.name }}</h1>
+    <table>
+        <tr>
+            <th>Product</th>
+            <th>Description</th>
+            <th>Price</th>
+        </tr>
+        {{#each data.cart}}
+        <tr>
+            <td>{{this.name}}</td>
+            <td>{{this.description}}</td>
+            <td>${{this.price}}</td>
+            <td>
+                <button onclick=window.location="/accounts/cart/{{this._id}}/remove">X</button>
+            </td>
+        </tr>
+        {{/each}}   
+        <tr>
+            <td>Total: ${{data.total}}</td>
+            <td>
+                <button onclick=window.location="/accounts/cart/purchase">Purchase</button>
+            </td>
+        </tr> 
+    </table>
 </div>
-</section>
 
-<section>
-    <h2>My profile</h2>
-    <p><b>My email: </b>{{ data.email }}</p>
-    <p><b>My address: </b>{{ data.address }}</p>
-    <p><b>My phone number: </b>{{ data.phone_number }}</p>
-    <p><b>My age is: </b>{{ data.age }}</p>
-    <img src="http://localhost:9000/{{ data.email }}.png" width="25%" height="25%">
-</section> <br><br>
 
-<section>
-    <form id="profilePicSubmit" action="/accounts/uploadProfilePic" method="post" enctype="multipart/form-data">
-    <label for="photo_url">Change my profile picture</label><br><br>
-    <input id="profilePic" type="file" name="avatar" accept=".png,.jpg,.jpeg"><br>
-    </form>
-</section>
 
-<script>
-    document.getElementById("profilePic").onchange = function() {
-    document.getElementById("profilePicSubmit").submit()
-}
-</script>
+
+
 
 <style>
+        table, th, td {
+        border:1px solid black;
+        }
+
         body{
             background-color: #f0ced6;
         }

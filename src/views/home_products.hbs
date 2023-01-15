@@ -1,0 +1,17 @@
+<table>
+    <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Description</th>
+        <th>Photo</th>
+    </tr>
+    {{#each data.products}}
+        <tr>
+            <td>{{this.name}}</td>
+            <td>${{this.price}}</td>
+            <td>{{this.description}}</td>
+            <td><img src={{this.photo}}></td>
+            <td><button class="cartBtn" id="{{this._id}}"> Add to cart</button></td>
+        </tr>
+    {{/each}}    
+</table>

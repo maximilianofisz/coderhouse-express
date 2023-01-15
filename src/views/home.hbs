@@ -83,6 +83,10 @@
         .dropdown:hover .dropbtn {background-color: #eb7993;}
         </style>
     </head>
+
+
+
+
     <body style="background-color: #f0ced6;">
         <section>
         <div class="dropdown">
@@ -93,63 +97,42 @@
                 <a href="/accounts/logout">Log out</a>
             </div>
             <div class="email"></div>
-            <script id="email" type="text/x-handlebars-template">
-                <h1> Welcome, {{name}}</h1>
-            </script>
+            
+            <h1> Welcome, {{data.user.fullName}}</h1>
             <hr>
             
         </div>
         </section>
 
-<iframe name="dummyframe" id="dummyframe" style="display:none"></iframe>
+
         <section class="input-products">
             
             <h1>Create a product</h1>
-            <form action="/" method="post" target="dummyframe">
+            
                 <label for="Name">Name:</label><br>
-                <input type="text" id="name" name="name"><br><br>
+                <input type="text" id="name" name="name" required><br><br>
 
                 <label for="Price">Price:</label><br>
-                <input type="number" id="price" name="price"><br><br>
+                <input type="number" id="price" name="price" required><br><br>
 
                 <label for="description">Description:</label><br>
-                <input type="text" id="description" name="description"><br><br>
+                <input type="text" id="description" name="description" required><br><br>
 
                 <label for="photo">Photo:</label><br>
-                <input type="text" id="photo" name="photo"><br><br>
+                <input type="text" id="photo" name="photo" required><br><br>
 
                 <input class="createProductBtn" type="submit" value="Submit">
-            </form>
+        
             <hr>
         </section>
 
 
-        <section class="list-products">
+        <section id="list-products">
             
-            <!-- Un script que me voy a traer para convertir en template e inyectar. Fetch me estaba tratando mal pero esto funciona-->
-            <script id="list-products" type="text/x-handlebars-template">
-                <table>
-                    <tr>
-                        <th>Product</th>
-                        <th>Price</th>
-                        <th>Description</th>
-                        <th>Photo</th>
-                    </tr>
-                    {{#each data}}
-                        <tr>
-                            <td>{{this.name}}</td>
-                            <td>${{this.price}}</td>
-                            <td>{{this.description}}</td>
-                            <td><img src={{this.photo}}></td>
-                            <td><button class="cartBtn" id="{{this._id}}"> Add to cart</button></td>
-                        </tr>
-                    {{/each}}    
-                </table>
-            </script>
         </section>
         <hr>
 
-        <section class="centro-mensajes">
+{{!--         <section class="centro-mensajes">
             <h1>Chat</h1>
             <div class="list-msgs">
                 <script id="list-msgs" type="text/x-handlebars-template">
@@ -171,7 +154,7 @@
                 <input type="text" id="msg" name="msg" style="opacity: 50%">
                 <button class="submitMensaje" type="button">Enviar</button>
             </div>
-        </section>
+        </section> --}}
     </body>
 </html>
 

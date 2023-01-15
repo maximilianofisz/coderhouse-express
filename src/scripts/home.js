@@ -1,44 +1,35 @@
 const socket = io()
 
+socket.connect()
 
 /* Me traigo los templates y los compilo, listos para pasarles valores y render */
-let emptyTemplateMsgs = $("#list-msgs").html()
-let emptyTemplateProducts = $("#list-products").html()
-let emptyTemplateName = $("#email").html()
 
-let compiledMsgs = Handlebars.compile(emptyTemplateMsgs)
-let compiledProducts = Handlebars.compile(emptyTemplateProducts)
-let compiledName = Handlebars.compile(emptyTemplateName)
+async function fetchAndRender(data){
+    const response = await fetch("./home_products.hbs")
+    const template = await response.text()
+    const dataCompile = Handlebars.compile(template)
+    const result = dataCompile(data)
+    return result
+}
 
-let user
-
-socket.on('currentUser', (data) =>{
+socket.on('currentProducts', async (data) =>{
     /* render */
-    user = data
-    $(".email").html(compiledName({name: user.email}))
+    /* $(".list-products").html(compiledProducts({data: data})) */
+    const productList = document.querySelector("#list-products")
+    const newContent = await fetchAndRender(data)
+    productList.innerHTML = newContent 
+
 })
 
-socket.on('currentProducts', (data) =>{
-    /* render */
-    $(".list-products").html(compiledProducts({data: data}))
-})
-
-socket.on('currentMsgs', (msgs) =>{
+/* socket.on('currentMsgs', (msgs) =>{
 
     console.log(msgs)
     $(".list-msgs").html(compiledMsgs({msgs: msgs}))
 
-})
+}) */
 
 
-
-/* Cada vez que alguien crea un producto, genero un evento global para actualizar la lista a todos */
-let buttonProductos = document.querySelector(".createProductBtn")
-buttonProductos.addEventListener("click", function(){
-    socket.emit('newProduct')
-})
-
-let buttonMensajes = document.querySelector(".submitMensaje")
+/* let buttonMensajes = document.querySelector(".submitMensaje")
 buttonMensajes.addEventListener("click", function(){
     let msgValue = document.getElementById("msg").value
     let msg = {
@@ -50,16 +41,42 @@ buttonMensajes.addEventListener("click", function(){
     }
     socket.emit("newMsg", msg)
 })
+ */
 
-document.getElementById("profilePic").onchange = function() {
-    document.getElementById("profilePicSubmit").submit()
+let submitProduct = document.querySelector(".createProductBtn")
+submitProduct.addEventListener("click", function(){
+    let name = document.getElementById("name").value
+    let price = document.getElementById("price").value
+    let desc = document.getElementById("description").value
+    let photo = document.getElementById("photo").value
+    console.log(name)
+
+    if (name == "" || price == "" || desc == "" || photo == ""){
+        alert("Please complete information about new product")
+    }
+    else {
+        let product = {
+            name: name,
+            price: price,
+            description: desc,
+            photo: photo        
+            }
+        console.log(product)
+        socket.emit("newProduct", product)
+        }
+    }
+)
+
+
+function addToCart(btn){
+    socket.emit("addCart", btn.id)
+    alert("Product added to cart!")
 }
 
+let cartBtns = document.querySelectorAll(".cartBtn")
+cartBtns.forEach(btn => {
+    btn.addEventListener("click", addToCart())
+})
 
-function logOut(){
-    window.location = "/accounts/logout"
-}
-let logOutBtn = document.querySelector('.btnLogout')
-logOutBtn.addEventListener('click', logOut)
 
 
