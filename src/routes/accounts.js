@@ -2,13 +2,9 @@ const express = require('express')
 const router = express.Router()
 const fs = require('fs')
 const session = require('express-session')
-const { Mongoose, default: mongoose } = require('mongoose')
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
-const mailer = require('../helpers/mailer.js')
-const twilioClient = require('../helpers/twillio-helper')
 const BcryptHelper = require('../helpers/bcrypt-helper')
-const MongoSchema = require('mongoose').Schema
 const bcryptHelper = new BcryptHelper()
 const multer = require('multer')
 const storage = multer.diskStorage({
@@ -20,30 +16,22 @@ const storage = multer.diskStorage({
     } 
 })
 const upload = multer({storage: storage})
+
 const pino = require('pino')
-const infoLog = pino()
+const logInformation = require('../middlewares/logInformation') 
 const errorLog = pino(pino.destination('./error.log'))
+router.use(logInformation)
 
-router.use((req, res, next) => {
-    infoLog.info(`${req.method} + ${req.originalUrl}`)
-    next()
-})
+const isAuth = require('../middlewares/isAuth')
 
+const mgfactory = require("../helpers/mongooseFactory")
+const mongooseFactory = new mgfactory()
+const Users = mongooseFactory.create("users")
+const Carts = mongooseFactory.create("carts")
 
-const Msgs = require('../helpers/msgsHelper.js')
-const Products = require('../helpers/productsHelper.js')
-const Users = require('../helpers/usersHelper.js')
-const Carts = require("../helpers/cartsHelper.js")
-
-
-function isAuth(req, res, next) {
-    if (req.isAuthenticated()) {
-        next()
-    }
-    else {
-        res.redirect("/accounts/login")
-    }
-}
+const { getRegister, postRegister, getLogin, postLogin, uploadProfilePic
+, getProfile, getCart, addItemToCart, removeItemFromCart, purchaseCart,
+getIncorrectCreds, getExistingCreds, logOut } = require('../controllers/accountsController')
 
 
 passport.use('login', new LocalStrategy({usernameField: 'email'},
@@ -134,139 +122,31 @@ passport.deserializeUser((id, done) => {
 })
 
 
-router.get("/register", async (req, res) => {
-    console.log("rendering!!")
-    res.render("register", {layout: false})
-})
+router.get("/register", getRegister)
 
-router.post("/register", passport.authenticate('register', {failureRedirect: "/accounts/existingcreds"}), async (req, res) => {
-    req.session.save()
-    res.redirect("/")
-})
+router.post("/register", passport.authenticate('register', {failureRedirect: "/accounts/existingcreds"}), postRegister)
 
 
-router.get("/login", async (req, res) => {
-    if (req.isAuthenticated()) {
-        res.redirect("/")
-    }
-    else {
-        res.render("login", {layout: false})
-    }    
-})
+router.get("/login", getLogin )
 
-router.post('/login', passport.authenticate('login', {failureRedirect: "/accounts/incorrectcreds"}), async (req, res)=> {
-    req.session.save()
-    res.redirect("/")    
-})
+router.post('/login', passport.authenticate('login', {failureRedirect: "/accounts/incorrectcreds"}), postLogin)
 
-router.post("/uploadProfilePic", upload.single("avatar"), async (req, res) => {
-    console.log("uploaded!")
-    res.redirect("/accounts/profile")
-})
+router.post("/uploadProfilePic", upload.single("avatar"), uploadProfilePic)
 
-router.get("/profile", isAuth, async (req, res) => {
-    let user = await Users.findOne({email: req.user.email}).lean()
-    res.render('profile', {layout: false, data: {
-        email: user.email,
-        name: user.fullName,
-        address: user.address,
-        age: user.age,
-        phone_number: user.phoneNumber
-    }})
-})
+router.get("/profile", isAuth, getProfile)
 
-router.get("/cart", isAuth, async (req, res) => {
-    let user = await Users.findOne({email: req.user.email}).lean()
-    let cart = await Carts.findOne({email: req.user.email}).lean()
-    let total = 0
-    cart.items.forEach( (item) => {
-        total = total + item.price
-    })
-    res.render('cart', {layout: false, data: {
-        cart: cart.items,
-        user: user.fullName,
-        total: total
-    }})
-})
+router.get("/cart", isAuth, getCart)
 
-router.post("/cart/:id", isAuth, async (req, res) => {
-    let item = await Products.findById(req.params.id).lean()
-    let cart = await Carts.findOne({email: req.user.email}).lean()
-    cart.items.push(item)
-    await Carts.updateOne({email: req.user.email}, {items: cart.items})
-    res.redirect("/accounts/cart")
-})
+router.post("/cart/:id", isAuth, addItemToCart)
 
-router.get("/cart/:id/remove", isAuth, async (req, res) => {
-    let item = await Products.findById(req.params.id).lean()
-    let cart = await Carts.findOne({email: req.user.email}).lean()
-    cart.items.splice(cart.items.findIndex( (cartItem) => {
-        return item._id.toString() == cartItem._id.toString() 
-    }), 1)
+router.get("/cart/:id/remove", isAuth, removeItemFromCart )
 
-    
-    await Carts.updateOne({email: req.user.email}, {items: cart.items})
-    res.redirect("/accounts/cart")
-})
+router.get("/cart/purchase", isAuth, purchaseCart)
 
-router.get("/cart/purchase", isAuth, async (req, res) => {
-    let cart = await Carts.findOne({email: req.user.email}).lean()
-    let user = await Users.findOne({email: req.user.email}).lean()
-    let total = 0
-    cart.items.forEach( (item) => {
-        total = total + item.price
-    })
+router.get("/incorrectcreds", getIncorrectCreds )
 
-    let bought = ''
+router.get("/existingcreds", getExistingCreds)
 
-    cart.items.forEach( (item) => {
-        bought = bought + `<li>${item.name + ' $' + item.price}</li>`
-    })
-    await Carts.updateOne({email: req.user.email}, {items: []})
-
-
-    mailer.sendMail({
-        from: 'Node Server',
-        to: process.env.ADMIN_MAIL_ADDRESS,
-        subject: "New purchase from " + user.fullName + ` (${user.email})`,
-        html: `User has bought the following items, for a total of $${total}:
-                <br>
-                <ul>${bought}</ul`
-    })
-    
-
-    await twilioClient.messages.create({
-        body: "New purchase from " + user.fullName + ` (${user.email})`,
-        from: "whatsapp:"+process.env.TWILIO_FROM_WPP,
-        to: "whatsapp:"+user.phoneNumber
-    })
-
-    await twilioClient.messages.create({
-        body: "Your purchase was registered correctly",
-        from: process.env.TWILIO_FROM_SMS,
-        to: "9"+user.phoneNumber
-    })
-    res.redirect("/accounts/cart")
-
-})
-
-
-router.get("/incorrectcreds", async (req, res) => {
-    res.render("incorrectcreds", {layout: false})
-})
-
-router.get("/existingcreds", async (req, res) => {
-    res.render("existingcreds", {layout: false})
-})
-
-router.get('/logout', async (req, res) => {
-    console.log(req.user)
-    res.render("logout", {data: req.user.email, layout: false})
-    req.logout((err) => {
-        if (err) {
-            return next(err)
-        }
-    })
-})
+router.get('/logout', logOut)
 
 module.exports = router

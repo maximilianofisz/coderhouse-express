@@ -22,19 +22,13 @@ const errorLog = pino(pino.destination('./error.log'))
 require('dotenv').config()
 console.log("Environmental variables", (process.env.STATE || "not loaded") )
 
-const Msgs = require('./helpers/msgsHelper.js')
-const Products = require('./helpers/productsHelper.js')
 
+// DBs
+const mgfactory = require("./helpers/mongooseFactory")
+const mongooseFactory = new mgfactory()
 
-
-
-
-
-
-
-
-
-
+const Msgs = mongooseFactory.create("msgs")
+const Products = mongooseFactory.create("products")
 
 
 const app = express()
@@ -42,22 +36,13 @@ const httpServer = new HttpServer(app)
 const io = new IOServer(httpServer)
 
 
-
-// Routers (temporalmente aca por la dependencia de 'IO')
-const homeRouter = require('./routes/home.js')(io)
+const homeRouter = require('./routes/home.js')
 const accountsRouter = require('./routes/accounts')
-const internalRouter = require('./routes/internal')
-const randomsRouter = require('./routes/randoms')
-/* const productosRouter = require('./routes/productos.js')
-const carritoRouter = require('./routes/carrito.js')
-const productosTestRouter = require("./routes/productosTest.js") */
 
 
 // App.sets
 app.set("view engine", "hbs")
 app.set("views", __dirname + "/views")
-/* Necesito esto para poder usar sockers en mi Router */
-app.set('socketio', io)
 
 
 // App.uses
@@ -96,15 +81,6 @@ app.use(express.static('src/scripts'))
 
 app.use(homeRouter)
 app.use("/accounts", accountsRouter)
-app.use("/internal", internalRouter)
-app.use("/api/randoms", randomsRouter)
-
-/* app.use("/api/productos", productosRouter)
-app.use("/api/carrito", carritoRouter)
-app.use("/api/productos-test", productosTestRouter) */
-
-// Middlewares
-// Log time and request
 
 
 app.use(express.static("uploads"))
@@ -138,7 +114,6 @@ io.on('connection', async (socket) => {
     }
 
     
-
     socket.emit("currentProducts", products)
     socket.emit("currentMsgs", msgs)
     
