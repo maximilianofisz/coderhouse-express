@@ -33,17 +33,19 @@
         <tr>
             <td>Total: ${{data.total}}</td>
             <td>
-                <button onclick=window.location="/accounts/cart/purchase">Purchase</button>
+                <button id="purchaseBtn">Purchase</button>
             </td>
         </tr> 
     </table>
 </div>
+<script>
+    let purchaseBtn = document.getElementById("purchaseBtn")
+    purchaseBtn.addEventListener("click", () => {
+        alert("You have succesfuly queued a purchase! Confirmation will be sent to your mobile device.")
+        window.location="/accounts/cart/purchase"
+    })
 
-
-
-
-
-
+</script>
 <style>
         table, th, td {
         border:1px solid black;

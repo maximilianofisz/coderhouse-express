@@ -1,15 +1,18 @@
+require('dotenv').config()
+console.log("Environmental variables", (process.env.STATE || "not loaded") )
 const express = require('express')
 const { Server: HttpServer } = require('http')
 const { Server: IOServer } = require('socket.io')
 // Dependencias
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
-const mongoose = require('mongoose')
+
+
 
 const bodyParser = require('body-parser')
 const passport = require('passport')
 const handlebars = require('express-handlebars')
-const MongoStore = require('connect-mongo')
+
 const pino = require('pino')
 
 // Loggers
@@ -19,9 +22,8 @@ const errorLog = pino(pino.destination('./error.log'))
 
 
 // Envs
-require('dotenv').config()
-console.log("Environmental variables", (process.env.STATE || "not loaded") )
 
+const { mongoSession } = require('./config/sessionConfig')
 
 // DBs
 const mgfactory = require("./helpers/mongooseFactory")
@@ -51,21 +53,9 @@ app.use(bodyParser.urlencoded({
     extended: true
 }))
 app.use(cookieParser())
-app.use(session({
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGOURL,
-        autoRemove: 'native',
-        ttl: 10 * 60,
-        mongoOptions: {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        }
-        
-    }),
-    secret: "coderhouse",
-    resave: true,
-    saveUninitialized: false
-}))
+
+
+app.use(mongoSession)
 
 app.use(passport.initialize())
 app.use(passport.session())
@@ -96,43 +86,31 @@ app.all("*", (req, res) => {
  });
 
 io.on('connection', async (socket) => {       
-    let products
-    let msgs
+  
     try{
-        products = await Products.find({}).lean()
-        
-    }
-    catch (err){
-        errorLog.error({error: err})
-    }
-    
-    try{
-        msgs = await Msgs.find({}).lean()
-    }
-    catch (err){
-        errorLog.error({error: err})
-    }
+        let products = await Products.find({}).lean()
+        let msgs = await Msgs.find({}).lean()
+        socket.emit("currentProducts", products)
+        socket.emit("currentMsgs", msgs)
 
-    
-    socket.emit("currentProducts", products)
-    socket.emit("currentMsgs", msgs)
-    
-    
+        socket.on("newProduct", async (product) => {
+            await Products.create(product)
+            let products = await Products.find().lean()
+            io.sockets.emit("currentProducts", products)
+        })
 
-    /* socket.on("newMsg", async (msg) => {
+        /* socket.on("newMsg", async (msg) => {
         msg.date = `[${moment().format('MMMM Do YYYY, h:mm:ss a')}]`
         Msgs.create(msg)
         let msgs = await Msgs.find().lean()
         io.sockets.emit("currentMsgs", msgs)
     }) */
-
-    socket.on("newProduct", async (product) => {
-        await Products.create(product)
-        let products = await Products.find().lean()
-        io.sockets.emit("currentProducts", products)
-    })
+    }
+    catch (err){
+        errorLog.error({error: err})
+        res.status(500).render("errors", {layout: false})
+    }
 })
-
 
 
 // Start

@@ -5,6 +5,8 @@ const Carts = mongooseFactory.create("carts")
 const Products = mongooseFactory.create("products")
 const mailer = require('../helpers/mailer-helper')
 const twilioClient = require('../helpers/twillio-helper')
+const pino = require('pino')
+const errorLog = pino(pino.destination('./error.log'))
 
 async function getRegister(req, res) {
     res.render("register", {layout: false})
@@ -34,87 +36,118 @@ async function uploadProfilePic(req, res) {
 }
 
 async function getProfile(req, res) {
-    let user = await Users.findOne({email: req.user.email}).lean()
-    res.render('profile', {layout: false, data: {
-        email: user.email,
-        name: user.fullName,
-        address: user.address,
-        age: user.age,
-        phone_number: user.phoneNumber
-    }})
+    try {
+        let user = await Users.findOne({email: req.user.email}).lean()
+        res.render('profile', {layout: false, data: {
+            email: user.email,
+            name: user.fullName,
+            address: user.address,
+            age: user.age,
+            phone_number: user.phoneNumber
+        }})
+    }
+    catch (err) {
+        errorLog.error({error: err})
+        res.status(500).render("errors", {layout: false})
+    }
 }
 
 async function getCart(req, res) {
-    let user = await Users.findOne({email: req.user.email}).lean()
-    let cart = await Carts.findOne({email: req.user.email}).lean()
-    let total = 0
-    cart.items.forEach( (item) => {
-        total = total + item.price
-    })
-    res.render('cart', {layout: false, data: {
-        cart: cart.items,
-        user: user.fullName,
-        total: total
-    }})
+    try {
+        let user = await Users.findOne({email: req.user.email}).lean()
+        let cart = await Carts.findOne({email: req.user.email}).lean()
+
+        let total = 0
+        cart.items.forEach( (item) => {
+            total = total + item.price
+        })
+        res.render('cart', {layout: false, data: {
+            cart: cart.items,
+            user: user.fullName,
+            total: total
+        }})
+    }
+    catch (err) {
+        errorLog.error({error: err})
+        res.status(500).render("errors", {layout: false})
+    }
 }
 
 async function addItemToCart(req, res) {
-    let item = await Products.findById(req.params.id).lean()
-    let cart = await Carts.findOne({email: req.user.email}).lean()
-    cart.items.push(item)
-    await Carts.updateOne({email: req.user.email}, {items: cart.items})
-    res.redirect("/accounts/cart")
+    try {
+        let item = await Products.findById(req.params.id).lean()
+        let cart = await Carts.findOne({email: req.user.email}).lean()
+        cart.items.push(item)
+        await Carts.updateOne({email: req.user.email}, {items: cart.items})
+        res.redirect("/accounts/cart")
+    }
+    catch (err) {
+        errorLog.error({error: err})
+        res.status(500).render("errors", {layout: false})
+    }
 }
 
 async function removeItemFromCart(req, res) {
-    let item = await Products.findById(req.params.id).lean()
-    let cart = await Carts.findOne({email: req.user.email}).lean()
-    cart.items.splice(cart.items.findIndex( (cartItem) => {
-        return item._id.toString() == cartItem._id.toString() 
-    }), 1)
-
-    
-    await Carts.updateOne({email: req.user.email}, {items: cart.items})
-    res.redirect("/accounts/cart")
+    try {
+        let item = await Products.findById(req.params.id).lean()
+        let cart = await Carts.findOne({email: req.user.email}).lean()
+        cart.items.splice(cart.items.findIndex( (cartItem) => {
+            return item._id.toString() == cartItem._id.toString() 
+        }), 1)
+        await Carts.updateOne({email: req.user.email}, {items: cart.items})
+        res.redirect("/accounts/cart")
+    }
+    catch (err) {
+        errorLog.error({error: err})
+        res.status(500).render("errors", {layout: false})
+    }
 }
 
 async function purchaseCart(req, res) {
-    let cart = await Carts.findOne({email: req.user.email}).lean()
-    let user = await Users.findOne({email: req.user.email}).lean()
-    let total = 0
-    cart.items.forEach( (item) => {
-        total = total + item.price
-    })
+    try {
+        let user = await Users.findOne({email: req.user.email}).lean()
+        let cart = await Carts.findOne({email: req.user.email}).lean()
+        let total = 0
+        cart.items.forEach( (item) => {
+            total = total + item.price
+        })
 
-    let bought = ''
+        let bought = ''
 
-    cart.items.forEach( (item) => {
-        bought = bought + `<li>${item.name + ' $' + item.price}</li>`
-    })
-    await Carts.updateOne({email: req.user.email}, {items: []})
+        cart.items.forEach( (item) => {
+            bought = bought + `<li>${item.name + ' $' + item.price}</li>`
+        })
 
-    mailer.sendMail({
-        from: 'Node Server',
-        to: process.env.ADMIN_MAIL_ADDRESS,
-        subject: "New purchase from " + user.fullName + ` (${user.email})`,
-        html: `User has bought the following items, for a total of $${total}:
-                <br>
-                <ul>${bought}</ul`
-    })
+        await Carts.updateOne({email: req.user.email}, {items: []})
+
+        mailer.sendMail({
+            from: 'Node Server',
+            to: process.env.ADMIN_MAIL_ADDRESS,
+            subject: "New purchase from " + user.fullName + ` (${user.email})`,
+            html: `User has bought the following items, for a total of $${total}:
+                    <br>
+                    <ul>${bought}</ul`
+        })
+
+        await twilioClient.messages.create({
+            body: "New purchase from " + user.fullName + ` (${user.email})`,
+            from: "whatsapp:"+process.env.TWILIO_FROM_WPP,
+            to: "whatsapp:"+user.phoneNumber
+        })
     
-    await twilioClient.messages.create({
-        body: "New purchase from " + user.fullName + ` (${user.email})`,
-        from: "whatsapp:"+process.env.TWILIO_FROM_WPP,
-        to: "whatsapp:"+user.phoneNumber
-    })
+        await twilioClient.messages.create({
+            body: "Your purchase was registered correctly",
+            from: process.env.TWILIO_FROM_SMS,
+            to: user.phoneNumber
+        })
 
-    await twilioClient.messages.create({
-        body: "Your purchase was registered correctly",
-        from: process.env.TWILIO_FROM_SMS,
-        to: user.phoneNumber
-    })
-    res.redirect("/accounts/cart")
+        res.redirect("/accounts/cart")
 
+    }
+    catch (err) {
+        errorLog.error({error: err.message})
+        res.status(500).render("errors", {layout: false})
+    }
 }
 
 async function getIncorrectCreds(req, res) {

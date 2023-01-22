@@ -1,22 +1,15 @@
 const express = require('express')
 const router = express.Router()
-const fs = require('fs')
+
 const session = require('express-session')
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const BcryptHelper = require('../helpers/bcrypt-helper')
 const bcryptHelper = new BcryptHelper()
-const multer = require('multer')
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "./uploads")
-    },
-    filename: function (req, file, cb) {
-        cb(null, req.user.email + ".png")
-    } 
-})
-const upload = multer({storage: storage})
+const { multerConfig } = require('../config/multerConfig')
 
+const upload = multerConfig
+const mailer = require('../helpers/mailer-helper')
 const pino = require('pino')
 const logInformation = require('../middlewares/logInformation') 
 const errorLog = pino(pino.destination('./error.log'))
@@ -38,6 +31,7 @@ passport.use('login', new LocalStrategy({usernameField: 'email'},
     (email, password, done) => {
         Users.findOne({email: email}, (err, user) => {
             if (err) {
+                errorLog.error({error: err})
                 return done(err)
             }
 
@@ -59,11 +53,11 @@ passport.use('register', new LocalStrategy({usernameField: 'email', passwordFiel
     (req, email, password, done) => {
         Users.findOne({email: email}, (err, user) => {
             if (err) {
-                console.log("Error while registering" + err)
+                errorLog.error({error: err})
                 return done(err)
             }
             if (user) {
-                console.log("Email already exists")
+                errorLog.error({error: "Credentials already exist"})
                 return done(null, false)                
             }
             else{
@@ -78,6 +72,7 @@ passport.use('register', new LocalStrategy({usernameField: 'email', passwordFiel
 
                 Users.create(newUser, async (err, user) => {
                     if (err) {
+                        errorLog.error({error: err})
                         return done(err)
                     }
                     else{
@@ -92,15 +87,7 @@ passport.use('register', new LocalStrategy({usernameField: 'email', passwordFiel
                             html: '<h1>New user, ' + newUser.fullName + ' has been registered!</h1><ul><li>Email address: ' + newUser.email +
                              '</li><li>Address: ' + newUser.address + '</li><li>Age: '+ newUser.age + '</li><li>Phone number: ' + newUser.phoneNumber + '</ul>'
                         })
-                        await fs.copyFile("uploads/sus.png", "uploads/" + newUser.email + ".png", (err) => {
-                            if (err) {
-                                errorLog.error({method: req.method, route: req.originalUrl, error: err})
-                            }
-                            else {
-                                return done(null, user)
-                            }
-                        })
-                        
+                        return done(null, user)
                     }
                 })
             }
@@ -116,7 +103,7 @@ passport.deserializeUser((id, done) => {
         Users.findById(id, done).lean()
     }
     catch (err) {
-        errorLog.error({method: req.method, route: req.originalUrl, error: err})
+        errorLog.error({error: err})
     }
     
 })
@@ -124,7 +111,7 @@ passport.deserializeUser((id, done) => {
 
 router.get("/register", getRegister)
 
-router.post("/register", passport.authenticate('register', {failureRedirect: "/accounts/existingcreds"}), postRegister)
+router.post("/register", upload.single("avatar"), passport.authenticate('register', {failureRedirect: "/accounts/existingcreds"}), postRegister)
 
 
 router.get("/login", getLogin )
