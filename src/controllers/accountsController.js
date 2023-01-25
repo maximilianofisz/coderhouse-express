@@ -8,6 +8,13 @@ const twilioClient = require('../helpers/twillio-helper')
 const pino = require('pino')
 const errorLog = pino(pino.destination('./error.log'))
 
+const DAOFactory = require('../DAOs/DAOFactory')
+
+const User = DAOFactory.getUserDAO()
+User.getAll()
+
+
+
 async function getRegister(req, res) {
     res.render("register", {layout: false})
 }
