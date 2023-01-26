@@ -1,4 +1,4 @@
-const mongooseHelper = require('../helpers/mongooseHelper')
+const mongooseHelper = require('./mongooseHelper')
 const userSchema = require('../models/userSchema')
 
 module.exports = class userDAO extends mongooseHelper {

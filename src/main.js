@@ -26,7 +26,7 @@ const errorLog = pino(pino.destination('./error.log'))
 const { mongoSession } = require('./config/sessionConfig')
 
 // DBs
-const mgfactory = require("./helpers/mongooseFactory")
+const mgfactory = require("./DAOs/DAOFactory")
 const mongooseFactory = new mgfactory()
 
 const Msgs = mongooseFactory.create("msgs")
