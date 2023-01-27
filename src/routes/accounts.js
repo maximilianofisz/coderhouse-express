@@ -17,10 +17,10 @@ router.use(logInformation)
 
 const isAuth = require('../middlewares/isAuth')
 
-const mgfactory = require("../helpers/mongooseFactory")
-const mongooseFactory = new mgfactory()
-const Users = mongooseFactory.create("users")
-const Carts = mongooseFactory.create("carts")
+const DAOsFactory = require('../DAOs/DAOFactory')
+
+const Users = DAOsFactory.getUserDAO()
+const Carts = DAOsFactory.getCartDAO()
 
 const { getRegister, postRegister, getLogin, postLogin, uploadProfilePic
 , getProfile, getCart, addItemToCart, removeItemFromCart, purchaseCart,
@@ -28,34 +28,31 @@ getIncorrectCreds, getExistingCreds, logOut } = require('../controllers/accounts
 
 
 passport.use('login', new LocalStrategy({usernameField: 'email'},
-    (email, password, done) => {
-        Users.findOne({email: email}, (err, user) => {
-            if (err) {
-                errorLog.error({error: err})
-                return done(err)
-            }
-
+    async (email, password, done) => {
+        try {
+            let user = await Users.getOne({email: email})
+            
             if (!user) {
                 console.log("user not found")
                 return done(null, false)
-                
             }
-
             if (!bcryptHelper.checkPassword(user.password, password)){
                 return done(null, false)
             }
+            console.log(user)
             return done(null, user)
-        }).lean()
+        }
+        catch (err) {
+            errorLog.error({error: err})
+            return done(err)
+        }
     }
 ))
 
 passport.use('register', new LocalStrategy({usernameField: 'email', passwordField: 'password', passReqToCallback: true},
-    (req, email, password, done) => {
-        Users.findOne({email: email}, (err, user) => {
-            if (err) {
-                errorLog.error({error: err})
-                return done(err)
-            }
+    async (req, email, password, done) => {
+        try {
+            let user = await Users.getOne({email: email})
             if (user) {
                 errorLog.error({error: "Credentials already exist"})
                 return done(null, false)                
@@ -69,41 +66,46 @@ passport.use('register', new LocalStrategy({usernameField: 'email', passwordFiel
                     age: req.body.age,
                     phoneNumber: req.body.phonenumber
                 }
-
-                Users.create(newUser, async (err, user) => {
-                    if (err) {
-                        errorLog.error({error: err})
-                        return done(err)
-                    }
-                    else{
-                        await Carts.create({
-                            email: newUser.email,
-                            items: []
-                        })
-                        mailer.sendMail({
-                            from: 'Node Server',
-                            to: process.env.ADMIN_MAIL_ADDRESS,
-                            subject: "New registered user",
-                            html: '<h1>New user, ' + newUser.fullName + ' has been registered!</h1><ul><li>Email address: ' + newUser.email +
-                             '</li><li>Address: ' + newUser.address + '</li><li>Age: '+ newUser.age + '</li><li>Phone number: ' + newUser.phoneNumber + '</ul>'
-                        })
-                        return done(null, user)
-                    }
-                })
+                try {
+                    let user = await Users.save(newUser)
+                    Carts.save({
+                        email: newUser.email,
+                        items: []
+                    })
+                    mailer.sendMail({
+                        from: 'Node Server',
+                        to: process.env.ADMIN_MAIL_ADDRESS,
+                        subject: "New registered user",
+                        html: '<h1>New user, ' + newUser.fullName + ' has been registered!</h1><ul><li>Email address: ' + newUser.email +
+                         '</li><li>Address: ' + newUser.address + '</li><li>Age: '+ newUser.age + '</li><li>Phone number: ' + newUser.phoneNumber + '</ul>'
+                    })
+                    return done(null, user)
+                }
+                catch (err) {
+                    errorLog.error({error: err})
+                    return done(err)
+                }
             }
-        }).lean()
+        }
+        catch (err){
+            errorLog.error({error: err})
+            return done(err)
+        }
+   
 }))
 
 passport.serializeUser( async (user, done) => {
     done(null, user._id)
 })
 
-passport.deserializeUser((id, done) => {
+passport.deserializeUser(async (id, done) => {
     try {
-        Users.findById(id, done).lean()
+        let user = await Users.getById(id)
+        if (user) return done(null, user)
     }
     catch (err) {
         errorLog.error({error: err})
+        return done(err)
     }
     
 })

@@ -1,8 +1,5 @@
 async function getHome(req, res) {
-    data = {
-        user: req.user
-    } 
-    res.render("home", {layout: false, data: data})
+    res.render("home", {layout: false, fullName: req.user.fullName})
 }
 
 module.exports = { getHome }

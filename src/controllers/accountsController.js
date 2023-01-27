@@ -1,17 +1,12 @@
-const mgfactory = require("../helpers/mongooseFactory")
-const mongooseFactory = new mgfactory()
-const Users = mongooseFactory.create("users")
-const Carts = mongooseFactory.create("carts")
-const Products = mongooseFactory.create("products")
 const mailer = require('../helpers/mailer-helper')
 const twilioClient = require('../helpers/twillio-helper')
 const pino = require('pino')
 const errorLog = pino(pino.destination('./error.log'))
 
 const DAOFactory = require('../DAOs/DAOFactory')
-
-const User = DAOFactory.getUserDAO()
-User.getAll()
+const Users = DAOFactory.getUserDAO()
+const Carts = DAOFactory.getCartDAO()
+const Products = DAOFactory.getProductDAO()
 
 
 
@@ -44,7 +39,7 @@ async function uploadProfilePic(req, res) {
 
 async function getProfile(req, res) {
     try {
-        let user = await Users.findOne({email: req.user.email}).lean()
+        let user = await Users.getOne({email: req.user.email})
         res.render('profile', {layout: false, data: {
             email: user.email,
             name: user.fullName,
@@ -61,8 +56,8 @@ async function getProfile(req, res) {
 
 async function getCart(req, res) {
     try {
-        let user = await Users.findOne({email: req.user.email}).lean()
-        let cart = await Carts.findOne({email: req.user.email}).lean()
+        let user = await Users.getOne({email: req.user.email})
+        let cart = await Carts.getOne({email: req.user.email})
 
         let total = 0
         cart.items.forEach( (item) => {
@@ -82,10 +77,10 @@ async function getCart(req, res) {
 
 async function addItemToCart(req, res) {
     try {
-        let item = await Products.findById(req.params.id).lean()
-        let cart = await Carts.findOne({email: req.user.email}).lean()
+        let item = await Products.getById(req.params.id)
+        let cart = await Carts.getOne({email: req.user.email})
         cart.items.push(item)
-        await Carts.updateOne({email: req.user.email}, {items: cart.items})
+        await Carts.updateOne({email: req.user.email}, cart)
         res.redirect("/accounts/cart")
     }
     catch (err) {
@@ -96,12 +91,13 @@ async function addItemToCart(req, res) {
 
 async function removeItemFromCart(req, res) {
     try {
-        let item = await Products.findById(req.params.id).lean()
-        let cart = await Carts.findOne({email: req.user.email}).lean()
+        let item = await Products.getById(req.params.id)
+        let cart = await Carts.getOne({email: req.user.email})
+
         cart.items.splice(cart.items.findIndex( (cartItem) => {
             return item._id.toString() == cartItem._id.toString() 
         }), 1)
-        await Carts.updateOne({email: req.user.email}, {items: cart.items})
+        await Carts.updateOne({email: req.user.email}, cart)
         res.redirect("/accounts/cart")
     }
     catch (err) {
@@ -112,8 +108,8 @@ async function removeItemFromCart(req, res) {
 
 async function purchaseCart(req, res) {
     try {
-        let user = await Users.findOne({email: req.user.email}).lean()
-        let cart = await Carts.findOne({email: req.user.email}).lean()
+        let user = await Users.getOne({email: req.user.email})
+        let cart = await Carts.getOne({email: req.user.email})
         let total = 0
         cart.items.forEach( (item) => {
             total = total + item.price
@@ -125,7 +121,9 @@ async function purchaseCart(req, res) {
             bought = bought + `<li>${item.name + ' $' + item.price}</li>`
         })
 
-        await Carts.updateOne({email: req.user.email}, {items: []})
+        cart.items = []
+
+        await Carts.updateOne({email: req.user.email}, cart)
 
         mailer.sendMail({
             from: 'Node Server',

@@ -7,6 +7,7 @@ const { Server: IOServer } = require('socket.io')
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
 
+const productDTO = require('./DTOs/productDTO')
 
 
 const bodyParser = require('body-parser')
@@ -26,12 +27,9 @@ const errorLog = pino(pino.destination('./error.log'))
 const { mongoSession } = require('./config/sessionConfig')
 
 // DBs
-const mgfactory = require("./DAOs/DAOFactory")
-const mongooseFactory = new mgfactory()
-
-const Msgs = mongooseFactory.create("msgs")
-const Products = mongooseFactory.create("products")
-
+const DAOsFactory = require('./DAOs/DAOFactory')
+const Msgs = DAOsFactory.getMsgDAO()
+const Products = DAOsFactory.getProductDAO()
 
 const app = express()
 const httpServer = new HttpServer(app)
@@ -88,14 +86,15 @@ app.all("*", (req, res) => {
 io.on('connection', async (socket) => {       
   
     try{
-        let products = await Products.find({}).lean()
-        let msgs = await Msgs.find({}).lean()
+        let products = await Products.getAll()
+        let msgs = await Msgs.getAll()
         socket.emit("currentProducts", products)
         socket.emit("currentMsgs", msgs)
 
-        socket.on("newProduct", async (product) => {
-            await Products.create(product)
-            let products = await Products.find().lean()
+        socket.on("newProduct", async (data) => {
+            let product = new productDTO(data)
+            await Products.save(product)
+            products = await Products.getAll()
             io.sockets.emit("currentProducts", products)
         })
 
