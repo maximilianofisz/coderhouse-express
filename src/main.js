@@ -38,6 +38,7 @@ const io = new IOServer(httpServer)
 
 const homeRouter = require('./routes/home.js')
 const accountsRouter = require('./routes/accounts')
+const productsRouter = require('./routes/products')
 
 
 // App.sets
@@ -69,6 +70,7 @@ app.use(express.static('src/scripts'))
 
 app.use(homeRouter)
 app.use("/accounts", accountsRouter)
+app.use("/products", productsRouter)
 
 
 app.use(express.static("uploads"))

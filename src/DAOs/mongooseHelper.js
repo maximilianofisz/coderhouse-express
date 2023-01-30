@@ -4,7 +4,6 @@ const dbHelperFactory = require('./dbHelperFactory')
 module.exports = class mongooseHelper extends dbHelperFactory {
     constructor(name, schema) {
         super()
-        console.log(process.env.MONGOURL)
         mongoose.connect(process.env.MONGOURL) 
         this.model = mongoose.model(name, schema)
     }
