@@ -120,6 +120,8 @@ httpServer.listen(PORT, ()=>{
     console.log(`App started and listening on port ${PORT} :) - Current PID is ${process.pid}`)
 })
 
+module.exports = app
+
 
 
 
