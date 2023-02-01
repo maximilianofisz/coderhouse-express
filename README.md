@@ -3,6 +3,7 @@
 Para iniciar el proyecto se puede ejecutar alguno o ambos de los siguientes comandos:
 ```
 pm2 start pm2Start.config.js
+npm run start
 ```
 ## Configurar 
 
@@ -18,4 +19,11 @@ Probablemente utilize el motor de plantillas Handlebars porque es el mas minimal
 | Version de artefacto | Puerto |
 | ----------- | ----------- |
 | Handlebars | Configurable al iniciar contenedor |
+
+## Testing 
+Para ejecutar los tests posibles (Axios y Mocha-Chai-Supertest) se deben ejecutar los siguientes comandos:
+```
+node /test/axios/test.js
+npm run mochaTest
+```
 
