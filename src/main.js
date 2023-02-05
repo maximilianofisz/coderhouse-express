@@ -3,6 +3,8 @@ console.log("Environmental variables", (process.env.STATE || "not loaded") )
 const express = require('express')
 const { Server: HttpServer } = require('http')
 const { Server: IOServer } = require('socket.io')
+const { graphqlHTTP } = require('express-graphql')
+
 // Dependencias
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
@@ -47,6 +49,7 @@ app.set("views", __dirname + "/views")
 
 
 // App.uses
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
     extended: true
@@ -73,6 +76,19 @@ app.use("/accounts", accountsRouter)
 app.use("/products", productsRouter)
 
 
+const schema = require('./models/scheme')
+const { getProducts, createProduct, getProductById, updateProduct, deleteProduct} = require('./resolvers/productResolver')
+app.use("/graphql", graphqlHTTP({
+    schema: schema,
+    rootValue: {
+        getProducts,
+        createProduct,
+        getProductById,
+        updateProduct,
+        deleteProduct
+    },
+    graphiql: true
+}))
 app.use(express.static("uploads"))
 
 // Handle non-implemented
