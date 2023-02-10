@@ -1,6 +1,6 @@
 const { buildSchema } = require('graphql')
 
-var schema = buildSchema(`
+let schema = buildSchema(`
 type Product {
     _id: String,
     name: String,
