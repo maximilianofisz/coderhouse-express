@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.159.0/http/server.ts";
-const port = 8081;
+const port = 8000;
 
 const colors: string[] = []
 
