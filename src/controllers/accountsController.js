@@ -143,7 +143,7 @@ async function purchaseCart(req, res) {
 
         await Carts.updateOne({email: req.user.email}, cart)
 
-        /* mailer.sendMail({
+        mailer.sendMail({
             from: 'Node Server',
             to: process.env.ADMIN_MAIL_ADDRESS,
             subject: "New purchase from " + user.fullName + ` (${user.email})`,
@@ -162,7 +162,7 @@ async function purchaseCart(req, res) {
             body: "Your purchase was registered correctly",
             from: process.env.TWILIO_FROM_SMS,
             to: user.phoneNumber
-        }) */
+        })
 
         res.redirect("/accounts/cart")
 
