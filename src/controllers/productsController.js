@@ -23,6 +23,32 @@ async function getProductById(req, res) {
     }
 }
 
+async function getProductsByCategory(req, res) {
+    try {
+        if(req.params.category == "all") {
+            res.send(await Products.getAll())  
+        }
+        else {
+            console.log(2)
+            res.send(await Products.getByCategory(req.params.category)) 
+        }
+    }
+    catch (err) {
+        errorLog.error({error: err})
+        res.status(500).render("errors", {layout: false})
+    }
+}
+
+async function getProductsLastTest(req, res) {
+    try {
+        res.send(await Products.getLast())
+    }
+    catch (err) {
+        errorLog.error({error: err})
+        res.status(500).render("errors", {layout: false})
+    }
+}
+
 async function postProduct(req, res) {
     try {
         await Products.save(req.body)
@@ -57,4 +83,4 @@ async function deleteProduct(req, res) {
     
 }
 
-module.exports = { getProducts, getProductById, postProduct, updateProduct, deleteProduct }
+module.exports = { getProducts, getProductById, getProductsByCategory, postProduct, updateProduct, deleteProduct, getProductsLastTest }

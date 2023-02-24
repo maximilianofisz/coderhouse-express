@@ -9,7 +9,7 @@ const session = require('express-session')
 
 const productDTO = require('./DTOs/productDTO')
 
-
+const moment = require('moment')
 const bodyParser = require('body-parser')
 const passport = require('passport')
 const handlebars = require('express-handlebars')
@@ -30,6 +30,8 @@ const { mongoSession } = require('./config/sessionConfig')
 const DAOsFactory = require('./DAOs/DAOFactory')
 const Msgs = DAOsFactory.getMsgDAO()
 const Products = DAOsFactory.getProductDAO()
+const Conversations = DAOsFactory.getConversationDAO()
+const Messages = DAOsFactory.getMsgDAO()
 
 const app = express()
 const httpServer = new HttpServer(app)
@@ -39,6 +41,7 @@ const io = new IOServer(httpServer)
 const homeRouter = require('./routes/home.js')
 const accountsRouter = require('./routes/accounts')
 const productsRouter = require('./routes/products')
+const chatRouter = require("./routes/chat")
 
 
 // App.sets
@@ -71,6 +74,18 @@ app.use(express.static('src/scripts'))
 app.use(homeRouter)
 app.use("/accounts", accountsRouter)
 app.use("/products", productsRouter)
+app.use("/chat", chatRouter)
+
+app.get("/internal/config", (req, res) => {
+    let config = {
+        environment: process.env.ENV,
+        port: process.env.PORT,
+        dbConnectionString: process.env.MONGOURL,
+        mailerAddress: process.env.ADMIN_MAIL_ADDRESS,
+        sessionTTL: process.env.SESSION_TTL
+    }
+    res.render("config", {data: config, layout: false})
+})
 
 
 app.use(express.static("uploads"))
@@ -85,27 +100,77 @@ app.all("*", (req, res) => {
     }))
  });
 
+
 io.on('connection', async (socket) => {       
   
     try{
         let products = await Products.getAll()
         let msgs = await Msgs.getAll()
+        let conversations = await Conversations.getAll()
+        conversations.reverse()
         socket.emit("currentProducts", products)
         socket.emit("currentMsgs", msgs)
+        socket.emit("currentConversations", conversations)
+
+
 
         socket.on("newProduct", async (data) => {
-            let product = new productDTO(data)
+            let product = new productDTO(data.name, data.price, data.description, data.photo, data.category)
             await Products.save(product)
             products = await Products.getAll()
             io.sockets.emit("currentProducts", products)
         })
 
-        /* socket.on("newMsg", async (msg) => {
-        msg.date = `[${moment().format('MMMM Do YYYY, h:mm:ss a')}]`
-        Msgs.create(msg)
-        let msgs = await Msgs.find().lean()
-        io.sockets.emit("currentMsgs", msgs)
-    }) */
+        socket.on("filterProducts", async (data) => {
+            let products = await Products.getByCategory(data)
+            socket.emit("filteredProducts", products)
+        })
+
+        socket.on("newConvo", async (data) => {
+            let messages = []
+            messages.push({
+                text: data.msg,
+                date: `[${moment().format('MMMM Do YYYY, h:mm:ss a')}]`,
+                email: data.author
+            })
+            await Conversations.save({
+                messages: messages
+            })
+
+            let message = {
+                text: data.msg,
+                date: `[${moment().format('MMMM Do YYYY, h:mm:ss a')}]`,
+                email: data.author
+            }
+            await Messages.save(message)
+
+            let conversations = await Conversations.getAll()
+            conversations.reverse()
+            io.sockets.emit("currentConversations", conversations)
+            console.log(conversations)
+            console.log("new convo1")
+        })
+
+        socket.on("newMsg", async (data) => {
+            let conversation = await Conversations.getById(data._id)
+            let message = {
+                text: data.msg,
+                date: `[${moment().format('MMMM Do YYYY, h:mm:ss a')}]`,
+                email: data.author
+            }
+
+            await Messages.save(message)
+
+            conversation.messages.push(message)
+            await Conversations.updateById(data._id, conversation)
+            let conversations = await Conversations.getAll()
+            conversations.reverse()
+            io.sockets.emit("currentConversations", conversations)
+            console.log(conversations)
+            console.log("new msg1")
+        })
+
+
     }
     catch (err){
         errorLog.error({error: err})

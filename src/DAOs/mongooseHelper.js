@@ -11,10 +11,31 @@ module.exports = class mongooseHelper extends dbHelperFactory {
         return await this.model.find().lean()
     }
     async getOne(identifier){
-        return await this.model.findOne(identifier).lean()
+        let data = await this.model.findOne(identifier).lean()
+        if (data) {
+            return data
+        }
+        else {
+            return "Data was not found"
+        }
     }
     async getById(id){
-        return await this.model.findById(id).lean()
+        let data = await this.model.findById(id).lean()
+        if (data) {
+            return data
+        }
+        else {
+            return "Data was not found"
+        }
+    }
+    async getLast() {
+        let data = await this.model.find().sort({_id: -1}).limit(1).lean()
+        if (data.length === 0) {
+            return null
+        }
+        else {
+            return data[0]
+        }
     }
     async save(data){
         let saved = await this.model.create(data)

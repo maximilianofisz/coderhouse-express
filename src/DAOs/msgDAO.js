@@ -6,5 +6,8 @@ module.exports = class msgDAO extends mongooseHelper {
         super("msgs", msgSchema)
     }
 
+    async getAllMsgs(email) {
+        return await this.model.find({email: email}).lean()
+    }
     // funciones propias de este dao
 }

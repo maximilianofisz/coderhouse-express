@@ -5,7 +5,7 @@ let mongoSession = session({
     store: MongoStore.create({
         mongoUrl: process.env.MONGOURL,
         autoRemove: 'native',
-        ttl: 10 * 60,
+        ttl: process.env.SESSION_TTL,
         mongoOptions: {
             useNewUrlParser: true,
             useUnifiedTopology: true

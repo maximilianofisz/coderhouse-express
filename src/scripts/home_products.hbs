@@ -3,6 +3,7 @@
         <th>Product</th>
         <th>Price</th>
         <th>Description</th>
+        <th>Category</th>
         <th>Photo</th>
     </tr>
     {{#each this}}
@@ -10,6 +11,7 @@
             <td>{{name}}</td>
             <td>${{price}}</td>
             <td>{{description}}</td>
+            <td>{{category}}</td>
             <td><img src={{photo}}></td>
             <td>
                 <form method="post" action="/accounts/cart/{{_id}}">

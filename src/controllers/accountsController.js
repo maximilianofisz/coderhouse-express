@@ -2,11 +2,13 @@ const mailer = require('../helpers/mailer-helper')
 const twilioClient = require('../helpers/twillio-helper')
 const pino = require('pino')
 const errorLog = pino(pino.destination('./error.log'))
+const moment = require('moment')
 
 const DAOFactory = require('../DAOs/DAOFactory')
 const Users = DAOFactory.getUserDAO()
 const Carts = DAOFactory.getCartDAO()
 const Products = DAOFactory.getProductDAO()
+const Orders = DAOFactory.getOrderDAO()
 
 
 
@@ -121,11 +123,27 @@ async function purchaseCart(req, res) {
             bought = bought + `<li>${item.name + ' $' + item.price}</li>`
         })
 
+        let orderNumber = 0
+        let lastOrder = await Orders.getLast()
+        console.log(lastOrder)
+        if (lastOrder) {
+            orderNumber = lastOrder.orderNumber + 1
+        }
+
+        let order = {
+            items: cart.items,
+            orderNumber: orderNumber,
+            date: `[${moment().format('MMMM Do YYYY, h:mm:ss a')}]`,
+            email: user.email
+        }
+        console.log(order)
+        await Orders.save(order)
+
         cart.items = []
 
         await Carts.updateOne({email: req.user.email}, cart)
 
-        mailer.sendMail({
+        /* mailer.sendMail({
             from: 'Node Server',
             to: process.env.ADMIN_MAIL_ADDRESS,
             subject: "New purchase from " + user.fullName + ` (${user.email})`,
@@ -144,7 +162,7 @@ async function purchaseCart(req, res) {
             body: "Your purchase was registered correctly",
             from: process.env.TWILIO_FROM_SMS,
             to: user.phoneNumber
-        })
+        }) */
 
         res.redirect("/accounts/cart")
 

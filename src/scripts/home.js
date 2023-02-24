@@ -21,27 +21,19 @@ socket.on('currentProducts', async (data) =>{
 
 })
 
-/* socket.on('currentMsgs', (msgs) =>{
-
-    console.log(msgs)
-    $(".list-msgs").html(compiledMsgs({msgs: msgs}))
-
-}) */
-
-
-/* let buttonMensajes = document.querySelector(".submitMensaje")
-buttonMensajes.addEventListener("click", function(){
-    let msgValue = document.getElementById("msg").value
-    let msg = {
-        text: msgValue,
-        author: {
-            id: user._id,
-            email: user.email
-        }
-    }
-    socket.emit("newMsg", msg)
+socket.on("filteredProducts", async (data) => {
+    const productList = document.querySelector("#list-products")
+    const newContent = await fetchAndRender(data)
+    productList.innerHTML = newContent 
 })
- */
+
+
+let categoryFinder  = document.getElementById("categoryFinder");
+function onChange() {
+  var value = categoryFinder.value;
+  socket.emit("filterProducts", value)
+}
+categoryFinder.onchange = onChange;
 
 let submitProduct = document.querySelector(".createProductBtn")
 submitProduct.addEventListener("click", function(){
@@ -49,9 +41,9 @@ submitProduct.addEventListener("click", function(){
     let price = document.getElementById("price").value
     let desc = document.getElementById("description").value
     let photo = document.getElementById("photo").value
-    console.log(name)
+    let category = document.getElementById("category").value
 
-    if (name == "" || price == "" || desc == "" || photo == ""){
+    if (name == "" || price == "" || desc == "" || photo == "" || category == ""){
         alert("Please complete information about new product")
     }
     else {
@@ -59,9 +51,9 @@ submitProduct.addEventListener("click", function(){
             name: name,
             price: price,
             description: desc,
-            photo: photo        
+            photo: photo,
+            category: category
             }
-        console.log(product)
         socket.emit("newProduct", product)
         }
     }

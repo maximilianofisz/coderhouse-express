@@ -39,7 +39,6 @@ passport.use('login', new LocalStrategy({usernameField: 'email'},
             if (!bcryptHelper.checkPassword(user.password, password)){
                 return done(null, false)
             }
-            console.log(user)
             return done(null, user)
         }
         catch (err) {

@@ -1,0 +1,9 @@
+{{#each this}}
+    {{#each messages}}
+        <div>{{email}} - {{date}}: {{text}} </div>
+    {{/each}}
+    <br>
+    <input type="hidden" id="reply_{{_id}}">
+    <button class="reply" id={{_id}}>Reply</button>
+<hr>
+{{/each}}
