@@ -23,6 +23,18 @@ async function getProductById(req, res) {
     }
 }
 
+async function getProductsDetailed(req, res) {
+    try {
+        let product = await Products.getById(req.params.id)
+        res.render("detailedProduct", {layout: false, data: product})
+
+    }
+    catch (err) {
+        errorLog.error({error: err})
+        res.status(500).render("errors", {layout: false})
+    }
+}
+
 async function getProductsByCategory(req, res) {
     try {
         if(req.params.category == "all") {
@@ -83,4 +95,4 @@ async function deleteProduct(req, res) {
     
 }
 
-module.exports = { getProducts, getProductById, getProductsByCategory, postProduct, updateProduct, deleteProduct, getProductsLastTest }
+module.exports = { getProducts, getProductById, getProductsByCategory, getProductsDetailed, postProduct, updateProduct, deleteProduct, getProductsLastTest }

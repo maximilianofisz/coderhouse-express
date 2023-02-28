@@ -11,5 +11,7 @@ router.use(logInformation)
 
 router.get('/', isAuth, getHome)
 
+router.get("/errors", (req, res) => res.render("errors", {layout: false}))
+
 module.exports = router
 

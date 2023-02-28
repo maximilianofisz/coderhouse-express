@@ -1,4 +1,15 @@
-require('dotenv').config()
+let env = process.argv[2]
+if(env === "dev"){
+    require('dotenv').config({path: "./dev.env"})
+    console.log("dev mode!")
+}
+else if(env === "prod") {
+    require('dotenv').config({path: "./prod.env"})
+}
+else {
+    throw Error("you don goof")
+}
+
 console.log("Environmental variables", (process.env.STATE || "not loaded") )
 const express = require('express')
 const { Server: HttpServer } = require('http')
@@ -89,6 +100,7 @@ app.get("/internal/config", (req, res) => {
 
 
 app.use(express.static("uploads"))
+
 
 // Handle non-implemented
 app.all("*", (req, res) => {
