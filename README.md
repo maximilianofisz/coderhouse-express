@@ -1,18 +1,18 @@
 # Coderhouse: Desafio con Express
 ## Iniciar el proyecto
-Para iniciar el proyecto se puede ejecutar alguno o ambos de los siguientes comandos:
+Para iniciar el proyecto se puede ejecutar alguno de los siguientes comandos:
 ```
-pm2 start pm2Start.config.js
-npm run start
+node ./src/main.js {dev/prod} (node en modo estandar)
+pm2 start pm2Start.config.js (instancias de cluster y fork)
+npm run start (nodemon en modo estandar)
 ```
 ## Configurar 
-
-* Para modificar la cantidad de instancias, puertos u otras configs, se puede modificar los archivos pm2Start.config.js.
+* Para modificar la cantidad de instancias, puertos u otras configs, se puede modificar los archivos pm2Start.config.js o los .env.
 
 * La configuracion de nginx se puede modificar desde default.conf seguido de hacer un rebuild del dockerfile. (Probablemente sea necesario que cambies una IP por la tuya si usas Docker)
 
-## Variables de enterno
-Se requiren las siguientes variables de entorno completas con los valores pertinentes para el correcto funcionamiento. Adjunto ejemplo:
+## Variables de entorno
+Se requiren las siguientes variables de entorno completas con los valores pertinentes para el correcto funcionamiento. Estas variables deben estar en dos archivos, dev.env y prod.env. Para elegir uno u otro, se toma el primer argumento del comando de iniciacion. Adjunto ejemplo:
 ````
 STATE=READY
 ENV=PROD
