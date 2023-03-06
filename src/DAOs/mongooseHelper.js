@@ -16,7 +16,7 @@ module.exports = class mongooseHelper extends dbHelperFactory {
             return data
         }
         else {
-            return "Data was not found"
+            return null
         }
     }
     async getById(id){

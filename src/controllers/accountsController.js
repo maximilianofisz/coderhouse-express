@@ -157,10 +157,10 @@ async function purchaseCart(req, res) {
             from: "whatsapp:"+process.env.TWILIO_FROM_WPP,
             to: "whatsapp:"+user.phoneNumber
         })
-    
+        
         await twilioClient.messages.create({
             body: "Your purchase was registered correctly",
-            from: process.env.TWILIO_FROM_SMS,
+            messagingServiceSid: process.env.TWILIO_FROM_SMS,
             to: user.phoneNumber
         })
 

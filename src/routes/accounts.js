@@ -52,6 +52,7 @@ passport.use('register', new LocalStrategy({usernameField: 'email', passwordFiel
     async (req, email, password, done) => {
         try {
             let user = await Users.getOne({email: email})
+            console.log(user)
             if (user) {
                 errorLog.error({error: "Credentials already exist"})
                 return done(null, false)                
